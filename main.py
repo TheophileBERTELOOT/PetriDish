@@ -9,15 +9,16 @@ SCREEN_SIZE_X = 1600
 SCREEN_SIZE_Y = 1000
 nbHerbivore = 50
 herbivoreInitRadius=20
+herbivoreInitHealth=10000
+herbivoreBonusHealthWhenEat=10
 grassRadius=5
 nbGrass=20
 pas=1
 
 display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y)
-instance = Instance(nbHerbivore,SCREEN_SIZE_X,SCREEN_SIZE_Y,herbivoreInitRadius,pas,nbGrass,grassRadius)
+instance = Instance(nbHerbivore,SCREEN_SIZE_X,SCREEN_SIZE_Y,herbivoreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,pas,nbGrass,grassRadius,)
 
 while running:
-    instance.herbivoresRun()
     instance.herbivoresAct()
     instance.isGoingThroughWall()
     display.displayAll(instance.herbivores,instance.grasses)

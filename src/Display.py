@@ -14,7 +14,8 @@ class Display:
 
     def displayHerbivores(self,herbivores):
         for herbivore in herbivores:
-            pg.draw.circle(self.screen, pg.Color((herbivore.r,herbivore.g,herbivore.b)), (herbivore.x,herbivore.y), herbivore.radius)
+            if herbivore.health>0:
+                pg.draw.circle(self.screen, pg.Color((herbivore.r,herbivore.g,herbivore.b)), (herbivore.x,herbivore.y), herbivore.radius)
 
     def displayGrasses(self,grasses):
         for grass in grasses:

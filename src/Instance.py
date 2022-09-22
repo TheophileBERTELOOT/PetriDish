@@ -5,12 +5,14 @@ import random
 import numpy as np
 
 class Instance:
-    def __init__(self,nbHerbivore,maxX,maxY,herbiboreInitRadius,herbivorePas,nbGrass,grassRadius):
+    def __init__(self,nbHerbivore,maxX,maxY,herbiboreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivorePas,nbGrass,grassRadius):
         self.dish = Dish(maxX,maxY)
         self.nbHerbivore = nbHerbivore
         self.maxX=maxX
         self.maxY=maxY
         self.herbivoreInitRadius=herbiboreInitRadius
+        self.herbivoreInitHealth=herbivoreInitHealth
+        self.herbivoreBonusHealthWhenEat=herbivoreBonusHealthWhenEat
         self.grassRadius=grassRadius
         self.herbivores = []
         self.grasses=[]
@@ -31,8 +33,10 @@ class Instance:
             g = 255
             b = random.randint(0,255)
             radius = self.herbivoreInitRadius
+            health = self.herbivoreInitHealth
+            bonusHealth=self.herbivoreBonusHealthWhenEat
             pas = self.herbivorePas
-            herbivore = Herbivore(x,y,dx,dy,r,g,b,radius,pas)
+            herbivore = Herbivore(x,y,dx,dy,r,g,b,radius,health,bonusHealth,pas)
             self.herbivores.append(herbivore)
 
     def initGrasses(self):
@@ -43,17 +47,19 @@ class Instance:
             grass = Grass(x,y,radius,self.maxX,self.maxY)
             self.grasses.append(grass)
 
-    def herbivoresRun(self):
-        for herbivore in self.herbivores:
-            herbivore.run()
+
 
     def herbivoresAct(self):
-        for herbivore in self.herbivores:
-            herbivore.act(self.grasses)
+        herbivoreDead=[]
+        for herbivoreIndex in range(len(self.herbivores)):
+            herbivore = self.herbivores[herbivoreIndex]
+            if herbivore.health > 0:
+                herbivore.act(self.grasses)
+                herbivore.run()
+                herbivore.dying()
 
-    def herbivoresEat(self):
-        for herbivore in self.herbivores:
-            herbivore.eat(self.grasses)
+
+
 
     def isGoingThroughWall(self):
         self.dish.isGoingThroughWall(self.herbivores)

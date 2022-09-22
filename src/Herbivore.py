@@ -5,7 +5,7 @@ from src.util import aColideWithB
 
 
 class Herbivore:
-    def __init__(self,x,y,dx,dy,r,g,b,radius,pas):
+    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,pas):
         self.x=x
         self.y=y
         self.dx=dx
@@ -13,6 +13,10 @@ class Herbivore:
         self.r=r
         self.g=g
         self.b=b
+        self.initialRadius=radius
+        self.initHealth=initHealth
+        self.bonusHealth=bonusHealth
+        self.health=initHealth
         self.radius=radius
         self.pas=pas
         self.hasEaten=False
@@ -34,9 +38,19 @@ class Herbivore:
             if aColideWithB(self.x,self.y,self.radius,grass.x,grass.y):
                 grass.eaten()
                 self.hasEaten=True
+                self.health+=self.bonusHealth
 
     def act(self,grasses):
         self.agent.play(self,grasses)
+
+    def dying(self):
+        self.health-=1
+        self.radius = int(self.initialRadius*(self.health/self.initHealth))
+        if self.radius>self.initialRadius:
+            self.radius=self.initialRadius
+
+
+
 
 
 
