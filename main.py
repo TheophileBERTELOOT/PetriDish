@@ -12,19 +12,26 @@ herbivoreInitRadius=20
 herbivoreInitHealth=10000
 herbivoreBonusHealthWhenEat=10000
 herbivoreReproductionThreshold=3
+nbCarnivore = 5
+carnivoreInitRadius=20
+carnivoreInitHealth=10000
+carnivoreBonusHealthWhenEat=10000
+carnivoreReproductionThreshold=3
 grassRadius=5
-nbGrass=20
-pas=1
+nbGrass=30
+herbivorePas=1
+carnivorePas=1
 
 display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y)
 instance = Instance(nbHerbivore,SCREEN_SIZE_X,SCREEN_SIZE_Y,
                     herbivoreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,
-                    pas,nbGrass,grassRadius,)
+                    nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,
+                    herbivorePas,carnivorePas,nbGrass,grassRadius,)
 
 while running:
-    instance.herbivoresAct()
+    instance.cellsAct()
     instance.isGoingThroughWall()
-    display.displayAll(instance.herbivores,instance.grasses)
+    display.displayAll(instance.herbivores,instance.grasses,instance.carnivores)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             running = False

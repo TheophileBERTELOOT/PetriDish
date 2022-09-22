@@ -9,7 +9,7 @@ class EGreedy:
         self.nbTimePlayed = [0 for _ in range(nbAction)]
         self.lastPlayedAction=0
 
-    def play(self,cell,grasses):
+    def play(self,cell,food):
         selectedAction=-1
 
         for actionIndex in range(self.nbAction):
@@ -23,20 +23,20 @@ class EGreedy:
                 tempMuChapeau = [self.muChapeau[i] / self.nbTimePlayed[i] for i in range(self.nbAction)]
                 selectedAction = np.argmax(tempMuChapeau)
         self.applyAction(cell,selectedAction)
-        cell.eat(grasses)
+        cell.eat(food)
         self.muChapeau[selectedAction] += cell.hasEaten
         if sum(self.nbTimePlayed)<self.T:
             self.nbTimePlayed[selectedAction] += 1
 
 
     def applyAction(self,cell,selectedAction):
-        if cell.dx>0 and cell.dy>0:
+        if cell.dx>=0 and cell.dy>=0:
             angle = np.arccos(cell.dx)
-        if cell.dx<0 and cell.dy>0:
+        if cell.dx<=0 and cell.dy>=0:
             angle = np.arccos(cell.dx)
-        if cell.dx>0 and cell.dy<0:
+        if cell.dx>=0 and cell.dy<=0:
             angle = -np.arcsin(cell.dx)
-        if cell.dx<0 and cell.dy<0:
+        if cell.dx<=0 and cell.dy<=0:
             angle = -np.arccos(cell.dx)
 
 
