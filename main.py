@@ -10,13 +10,16 @@ SCREEN_SIZE_Y = 1000
 nbHerbivore = 50
 herbivoreInitRadius=20
 herbivoreInitHealth=10000
-herbivoreBonusHealthWhenEat=1000
+herbivoreBonusHealthWhenEat=10000
+herbivoreReproductionThreshold=3
 grassRadius=5
 nbGrass=20
 pas=1
 
 display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y)
-instance = Instance(nbHerbivore,SCREEN_SIZE_X,SCREEN_SIZE_Y,herbivoreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,pas,nbGrass,grassRadius,)
+instance = Instance(nbHerbivore,SCREEN_SIZE_X,SCREEN_SIZE_Y,
+                    herbivoreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,
+                    pas,nbGrass,grassRadius,)
 
 while running:
     instance.herbivoresAct()

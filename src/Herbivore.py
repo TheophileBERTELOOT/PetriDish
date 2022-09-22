@@ -5,7 +5,7 @@ from src.util import aColideWithB
 
 
 class Herbivore:
-    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,pas):
+    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,pas):
         self.x=x
         self.y=y
         self.dx=dx
@@ -16,9 +16,12 @@ class Herbivore:
         self.initialRadius=radius
         self.initHealth=initHealth
         self.bonusHealth=bonusHealth
+        self.reproductionThreshold=reproductionThreshold
         self.health=initHealth
         self.radius=radius
         self.pas=pas
+        self.nbOffspring=0
+        self.nbAte=0
         self.hasEaten=False
         self.agent=EGreedy(2,1000)
 
@@ -39,6 +42,7 @@ class Herbivore:
                 grass.eaten()
                 self.hasEaten=True
                 self.health+=self.bonusHealth
+                self.nbAte+=1
 
     def act(self,grasses):
         self.agent.play(self,grasses)
@@ -48,6 +52,21 @@ class Herbivore:
         self.radius = int(self.initialRadius*(self.health/self.initHealth))
         if self.radius>self.initialRadius:
             self.radius=self.initialRadius
+        if self.radius<10:
+            self.radius=10
+
+    def shouldReproduce(self):
+        if self.nbAte>=self.reproductionThreshold:
+            self.nbAte=0
+            self.nbOffspring+=1
+            return True
+        return False
+
+
+
+
+
+
 
 
 
