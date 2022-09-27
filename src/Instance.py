@@ -8,10 +8,10 @@ from copy import deepcopy
 
 class Instance:
     def __init__(self,nbHerbivore,maxX,maxY,
-                 herbiboreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,
-                 nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,
-                 herbivorePas,carnivorePas,nbGrass,grassRadius):
-        self.dish = Dish(maxX,maxY)
+                 herbiboreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,herbivoreHungrinessThreshold,
+                 nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,carnivoreHungrinessThreshold,
+                 herbivorePas,carnivorePas,nbGrass,grassRadius,grassZoneEditRadius):
+        self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius)
         self.nbHerbivore = nbHerbivore
         self.nbCarnivore=nbCarnivore
         self.maxX=maxX
@@ -20,20 +20,26 @@ class Instance:
         self.herbivoreInitHealth=herbivoreInitHealth
         self.herbivoreBonusHealthWhenEat=herbivoreBonusHealthWhenEat
         self.herbivoreReproductionThreshold=herbivoreReproductionThreshold
+        self.herbivoreHungrinessThreshold=herbivoreHungrinessThreshold
         self.carnivoreInitRadius=carnivoreInitRadius
         self.carnivoreInitHealth=carnivoreInitHealth
         self.carnivoreBonusHealthWhenEat=carnivoreBonusHealthWhenEat
         self.carnivoreReproductionThreshold=carnivoreReproductionThreshold
+        self.carnivoreHungrinessThreshold=carnivoreHungrinessThreshold
         self.grassRadius=grassRadius
-        self.herbivores = []
-        self.carnivores = []
-        self.grasses=[]
         self.nbGrass=nbGrass
         self.herbivorePas=herbivorePas
         self.carnivorePas=carnivorePas
+        self.grassZoneEditRadius = grassZoneEditRadius
+        self.herbivores = []
+        self.carnivores = []
+
+
+        self.grassEditMode = False
+
         self.initHerbivores()
         self.initCarnivores()
-        self.initGrasses()
+
 
     def initHerbivore(self,parent=None):
         if parent == None:
@@ -49,8 +55,9 @@ class Instance:
             health = self.herbivoreInitHealth
             bonusHealth = self.herbivoreBonusHealthWhenEat
             reproductionThreshold = self.herbivoreReproductionThreshold
+            hungrinessThreshold = self.herbivoreHungrinessThreshold
             pas = self.herbivorePas
-            herbivore = Herbivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold, pas)
+            herbivore = Herbivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas)
         else:
             x = parent.x
             y = parent.y
@@ -65,7 +72,8 @@ class Instance:
             bonusHealth = self.herbivoreBonusHealthWhenEat
             reproductionThreshold = self.herbivoreReproductionThreshold
             pas = self.herbivorePas
-            herbivore = Herbivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold, pas)
+            hungrinessThreshold = self.herbivoreHungrinessThreshold
+            herbivore = Herbivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas)
             herbivore.agent = deepcopy(parent.agent)
         return herbivore
 
@@ -89,8 +97,9 @@ class Instance:
             health = self.carnivoreInitHealth
             bonusHealth = self.carnivoreBonusHealthWhenEat
             reproductionThreshold = self.carnivoreReproductionThreshold
+            hungrinessThreshold = self.carnivoreHungrinessThreshold
             pas = self.carnivorePas
-            carnivore = Carnivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold, pas)
+            carnivore = Carnivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas)
         else:
             x = parent.x
             y = parent.y
@@ -104,8 +113,9 @@ class Instance:
             health = self.carnivoreInitHealth
             bonusHealth = self.carnivoreBonusHealthWhenEat
             reproductionThreshold = self.carnivoreReproductionThreshold
+            hungrinessThreshold = self.carnivoreHungrinessThreshold
             pas = self.carnivorePas
-            carnivore = Carnivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold, pas)
+            carnivore = Carnivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas)
             carnivore.agent = deepcopy(parent.agent)
         return carnivore
 
@@ -114,22 +124,12 @@ class Instance:
             carnivore = self.initCarnivore()
             self.carnivores.append(carnivore)
 
-    def initGrasses(self):
-        for _ in range(self.nbGrass):
-            x = random.randint(0, self.maxX)
-            y = random.randint(0, self.maxY)
-            radius= self.grassRadius
-            grass = Grass(x,y,radius,self.maxX,self.maxY)
-            self.grasses.append(grass)
-
-
-
     def herbivoresAct(self):
         newBorns=[]
         for herbivoreIndex in range(len(self.herbivores)):
             herbivore = self.herbivores[herbivoreIndex]
             if herbivore.health > 0:
-                herbivore.act(self.grasses)
+                herbivore.act(self.dish.grasses)
                 herbivore.run()
                 herbivore.dying()
                 if herbivore.shouldReproduce():
@@ -171,9 +171,15 @@ class Instance:
         self.herbivoresAct()
         self.carnivoresAct()
 
+    def updateDish(self):
+        self.dish.regrowEatenGrasses()
 
     def isGoingThroughWall(self):
         self.dish.isGoingThroughWall(self.herbivores+self.carnivores)
+
+
+
+
 
 
 

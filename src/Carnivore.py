@@ -5,7 +5,7 @@ from src.util import aColideWithB
 
 
 class Carnivore:
-    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,pas):
+    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas):
         self.x=x
         self.y=y
         self.dx=dx
@@ -17,6 +17,8 @@ class Carnivore:
         self.initHealth=initHealth
         self.bonusHealth=bonusHealth
         self.reproductionThreshold=reproductionThreshold
+        self.hungrinessThreshold=hungrinessThreshold
+        self.hungriness=0
         self.health=initHealth
         self.radius=radius
         self.pas=pas
@@ -38,11 +40,14 @@ class Carnivore:
     def eat(self,herbivores):
         self.hasEaten=False
         for herbivore in herbivores:
-            if aColideWithB(self.x,self.y,self.radius,herbivore.x,herbivore.y) and herbivore.health>0:
+            if aColideWithB(self.x,self.y,self.radius,herbivore.x,herbivore.y) and herbivore.health>0 and self.hungriness>self.hungrinessThreshold:
                 herbivore.health = 0
                 self.hasEaten=True
                 self.health+=self.bonusHealth
                 self.nbAte+=1
+                self.hungriness=0
+        if not self.hasEaten:
+            self.hungriness+=1
 
     def act(self,herbivores):
         self.agent.play(self,herbivores)

@@ -7,8 +7,8 @@ class Grass:
         self.maxX=maxX
         self.maxY=maxY
         self.radius=radius
+        self.isEaten = False
         self.color=pg.Color(0,255,0)
 
     def eaten(self):
-        self.x = random.randint(0,self.maxX)
-        self.y = random.randint(0,self.maxY)
+        self.isEaten = True
