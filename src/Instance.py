@@ -52,6 +52,8 @@ class Instance:
         self.carnivores = []
         self.fourmis=[]
 
+        self.TYPE_REINE = 0
+        self.TYPE_OUVRIERE=1
 
         self.grassEditMode = False
 
@@ -143,7 +145,7 @@ class Instance:
             carnivore = self.initCarnivore()
             self.carnivores.append(carnivore)
 
-    def initFourmi(self,parent=None,colonieId=0,color=()):
+    def initFourmi(self,parent=None,colonieId=0,color=(),type=1):
         if parent == None:
             x = random.randint(0, self.maxX)
             y = random.randint(0, self.maxY)
@@ -156,7 +158,7 @@ class Instance:
             reproductionThreshold = self.fourmiReproductionThreshold
             hungrinessThreshold = self.fourmiHungrinessThreshold
             pas = self.fourmiPas
-            fourmi = Fourmi(x, y, dx, dy, color[0],color[1],color[2], radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,0,colonieId)
+            fourmi = Fourmi(x, y, dx, dy, color[0],color[1],color[2], radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
         else:
             x = parent.x
             y = parent.y
@@ -164,7 +166,7 @@ class Instance:
             dx = np.cos(angle)
             dy = np.sin(angle)
             r = parent.r
-            g = 255
+            g = parent.g
             b = parent.b
             radius = self.fourmiInitRadius
             health = self.fourmiInitHealth
@@ -173,7 +175,7 @@ class Instance:
             pas = self.fourmiPas
             hungrinessThreshold = self.fourmiHungrinessThreshold
             colonieId= parent.colonieId
-            fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,0,colonieId)
+            fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
             fourmi.agent = deepcopy(parent.agent)
         return fourmi
 
@@ -185,7 +187,13 @@ class Instance:
             b = random.randint(0, 100)
             colonieColor = (r,g,b)
             for _ in range(self.nbFourmiPerColonie):
-                fourmi = self.initFourmi(colonieId=colonieId,color=colonieColor)
+                type= self.TYPE_OUVRIERE
+                if _ == 0:
+                    type = self.TYPE_REINE
+                    reine = self.initFourmi(colonieId=colonieId,color=colonieColor,type=type)
+                    fourmi = reine
+                else:
+                    fourmi = self.initFourmi(parent=reine,color=colonieColor,type=type)
                 self.fourmis.append(fourmi)
 
     def herbivoresAct(self):

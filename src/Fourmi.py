@@ -4,7 +4,7 @@ from src.Agent import EGreedy
 from src.util import aColideWithB
 
 class Fourmi:
-    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,type,colonieId):
+    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,type,colonieId,TYPE_REINE,TYPE_OUVRIERE):
         self.x = x
         self.y = y
         self.dx = dx
@@ -12,8 +12,8 @@ class Fourmi:
         self.r = r
         self.g = g
         self.b = b
-        self.TYPE_REINE = 0
-        self.TYPE_OUVRIERE=1
+        self.TYPE_REINE = TYPE_REINE
+        self.TYPE_OUVRIERE=TYPE_OUVRIERE
         self.type=type
         self.initialRadius = radius
         self.colonieId=colonieId
@@ -33,7 +33,7 @@ class Fourmi:
         self.agent = EGreedy(2, 1000)
 
     def run(self):
-        if self.type!='queen':
+        if self.type!=self.TYPE_REINE:
             self.x += self.pas * self.dx
             self.y += self.pas * self.dy
             self.normalize()
@@ -56,6 +56,11 @@ class Fourmi:
                     self.health += self.bonusHealth
                     self.nbAte += 1
                     self.hungriness = 0
+                elif r>self.probEatCarriedFood and r<50*self.probEatCarriedFood:
+                    self.foodCarried.isCarried = False
+                    self.foodCarried.x = self.x+self.radius*1.5*self.dx
+                    self.foodCarried.y = self.y+self.radius*1.5*self.dy
+                    self.foodCarried = None
 
     def eat(self, grasses):
         self.hasEaten = False

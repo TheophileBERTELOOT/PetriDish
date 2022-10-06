@@ -7,6 +7,8 @@ class Display:
         self.nbHerbivore = 0
         self.nbCarnivore = 0
         self.nbFourmis = 0
+        self.TYPE_REINE = 0
+        self.TYPE_OUVRIERE=1
         self.screen = pg.display.set_mode((SCREEN_SIZE_X, SCREEN_SIZE_Y))
         self.font = pg.font.Font('freesansbold.ttf', 16)
 
@@ -45,9 +47,13 @@ class Display:
         self.nbFourmis=0
         for fourmi in fourmis:
             if fourmi.health>0:
+                if fourmi.type == self.TYPE_REINE:
+                    pg.draw.circle(self.screen, pg.Color((255, 255, 0)), (fourmi.x, fourmi.y),
+                                   fourmi.radius+3)
                 pg.draw.circle(self.screen, pg.Color((fourmi.r,fourmi.g,fourmi.b)), (fourmi.x,fourmi.y), fourmi.radius)
                 if fourmi.foodCarried != None:
                     pg.draw.circle(self.screen,fourmi.foodCarried.color, (fourmi.x+((fourmi.radius+2)*fourmi.dx),fourmi.y+((fourmi.radius+2)*fourmi.dy)),fourmi.foodCarried.radius)
+
                 self.nbFourmis+=1
 
     def displayCarnivores(self,carnivores):
