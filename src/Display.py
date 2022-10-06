@@ -6,13 +6,15 @@ class Display:
         self.screenSizeY = SCREEN_SIZE_Y
         self.nbHerbivore = 0
         self.nbCarnivore = 0
+        self.nbFourmis = 0
         self.screen = pg.display.set_mode((SCREEN_SIZE_X, SCREEN_SIZE_Y))
         self.font = pg.font.Font('freesansbold.ttf', 16)
 
-    def displayAll(self,herbivores,carnivores,dish,eventHandler):
+    def displayAll(self,herbivores,carnivores,fourmis,dish,eventHandler):
         self.screen.fill((255, 255, 255))
         self.displayHerbivores(herbivores)
         self.displayCarnivores(carnivores)
+        self.displayFourmis(fourmis)
         self.displayDish(dish,eventHandler)
         self.displayInformation()
         self.displayInstructions(eventHandler.grassEditMode)
@@ -21,8 +23,10 @@ class Display:
     def displayInformation(self):
         nbHerbivoreTxt = self.font.render('NbHerbivore : '+str(self.nbHerbivore), True,(0,0,0))
         nbCarnivoreTxt = self.font.render('NbCarnivore : ' + str(self.nbCarnivore), True, (0, 0, 0))
+        nbFourmiTxt = self.font.render('NbFourmi : ' + str(self.nbFourmis), True, (0, 0, 0))
         self.screen.blit(nbHerbivoreTxt,(10,15))
         self.screen.blit(nbCarnivoreTxt, (10, 30))
+        self.screen.blit(nbFourmiTxt, (10, 45))
 
     def displayInstructions(self,isGrassEditMode):
         if isGrassEditMode:
@@ -37,6 +41,15 @@ class Display:
                 pg.draw.circle(self.screen, pg.Color((herbivore.r,herbivore.g,herbivore.b)), (herbivore.x,herbivore.y), herbivore.radius)
                 self.nbHerbivore+=1
 
+    def displayFourmis(self,fourmis):
+        self.nbFourmis=0
+        for fourmi in fourmis:
+            if fourmi.health>0:
+                pg.draw.circle(self.screen, pg.Color((fourmi.r,fourmi.g,fourmi.b)), (fourmi.x,fourmi.y), fourmi.radius)
+                if fourmi.foodCarried != None:
+                    pg.draw.circle(self.screen,fourmi.foodCarried.color, (fourmi.x+((fourmi.radius+2)*fourmi.dx),fourmi.y+((fourmi.radius+2)*fourmi.dy)),fourmi.foodCarried.radius)
+                self.nbFourmis+=1
+
     def displayCarnivores(self,carnivores):
         self.nbCarnivore=0
         for carnivore in carnivores:
@@ -48,7 +61,8 @@ class Display:
 
     def displayGrasses(self,grasses):
         for grass in grasses:
-            pg.draw.circle(self.screen, grass.color, (grass.x,grass.y), grass.radius)
+            if not grass.isCarried:
+                pg.draw.circle(self.screen, grass.color, (grass.x,grass.y), grass.radius)
 
     def displayGrassesEditZones(self,dish):
         for zone in dish.shouldGrowCoordinate:

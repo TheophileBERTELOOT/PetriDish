@@ -1,6 +1,7 @@
 from src.Dish import Dish
 from src.Grass import Grass
 from src.Herbivore import Herbivore
+from src.Fourmi import Fourmi
 from src.Carnivore import Carnivore
 import random
 import numpy as np
@@ -10,35 +11,53 @@ class Instance:
     def __init__(self,nbHerbivore,maxX,maxY,
                  herbiboreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,herbivoreHungrinessThreshold,
                  nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,carnivoreHungrinessThreshold,
-                 herbivorePas,carnivorePas,nbGrass,grassRadius,grassZoneEditRadius):
+                 nbFourmiPerColonie,nbFourmiColonie, fourmiInitRadius, fourmiInitHealth, fourmiBonusHealthWhenEat, fourmiReproductionThreshold,
+                 fourmiHungrinessThreshold,
+                 herbivorePas,carnivorePas,fourmiPas,nbGrass,grassRadius,grassZoneEditRadius):
         self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius)
-        self.nbHerbivore = nbHerbivore
-        self.nbCarnivore=nbCarnivore
+
         self.maxX=maxX
         self.maxY=maxY
+
         self.herbivoreInitRadius=herbiboreInitRadius
         self.herbivoreInitHealth=herbivoreInitHealth
         self.herbivoreBonusHealthWhenEat=herbivoreBonusHealthWhenEat
         self.herbivoreReproductionThreshold=herbivoreReproductionThreshold
         self.herbivoreHungrinessThreshold=herbivoreHungrinessThreshold
+
         self.carnivoreInitRadius=carnivoreInitRadius
         self.carnivoreInitHealth=carnivoreInitHealth
         self.carnivoreBonusHealthWhenEat=carnivoreBonusHealthWhenEat
         self.carnivoreReproductionThreshold=carnivoreReproductionThreshold
         self.carnivoreHungrinessThreshold=carnivoreHungrinessThreshold
+
+        self.fourmiInitRadius=fourmiInitRadius
+        self.fourmiInitHealth=fourmiInitHealth
+        self.fourmiBonusHealthWhenEat=fourmiBonusHealthWhenEat
+        self.fourmiReproductionThreshold=fourmiReproductionThreshold
+        self.fourmiHungrinessThreshold=fourmiHungrinessThreshold
+
         self.grassRadius=grassRadius
         self.nbGrass=nbGrass
+        self.nbHerbivore = nbHerbivore
+        self.nbCarnivore=nbCarnivore
+        self.nbFourmiPerColonie=nbFourmiPerColonie
+        self.nbFourmiColonie=nbFourmiColonie
         self.herbivorePas=herbivorePas
         self.carnivorePas=carnivorePas
+        self.fourmiPas=fourmiPas
+
         self.grassZoneEditRadius = grassZoneEditRadius
         self.herbivores = []
         self.carnivores = []
+        self.fourmis=[]
 
 
         self.grassEditMode = False
 
         self.initHerbivores()
         self.initCarnivores()
+        self.initFourmis()
 
 
     def initHerbivore(self,parent=None):
@@ -124,6 +143,51 @@ class Instance:
             carnivore = self.initCarnivore()
             self.carnivores.append(carnivore)
 
+    def initFourmi(self,parent=None,colonieId=0,color=()):
+        if parent == None:
+            x = random.randint(0, self.maxX)
+            y = random.randint(0, self.maxY)
+            angle = random.randint(0, self.maxX)
+            dx = np.cos(angle)
+            dy = np.sin(angle)
+            radius = self.fourmiInitRadius
+            health = self.fourmiInitHealth
+            bonusHealth = self.fourmiBonusHealthWhenEat
+            reproductionThreshold = self.fourmiReproductionThreshold
+            hungrinessThreshold = self.fourmiHungrinessThreshold
+            pas = self.fourmiPas
+            fourmi = Fourmi(x, y, dx, dy, color[0],color[1],color[2], radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,0,colonieId)
+        else:
+            x = parent.x
+            y = parent.y
+            angle = random.randint(0, self.maxX)
+            dx = np.cos(angle)
+            dy = np.sin(angle)
+            r = parent.r
+            g = 255
+            b = parent.b
+            radius = self.fourmiInitRadius
+            health = self.fourmiInitHealth
+            bonusHealth = self.fourmiBonusHealthWhenEat
+            reproductionThreshold = self.fourmiReproductionThreshold
+            pas = self.fourmiPas
+            hungrinessThreshold = self.fourmiHungrinessThreshold
+            colonieId= parent.colonieId
+            fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,0,colonieId)
+            fourmi.agent = deepcopy(parent.agent)
+        return fourmi
+
+
+    def initFourmis(self):
+        for colonieId in range(self.nbFourmiColonie):
+            r = random.randint(0, 100)
+            g = random.randint(0, 100)
+            b = random.randint(0, 100)
+            colonieColor = (r,g,b)
+            for _ in range(self.nbFourmiPerColonie):
+                fourmi = self.initFourmi(colonieId=colonieId,color=colonieColor)
+                self.fourmis.append(fourmi)
+
     def herbivoresAct(self):
         newBorns=[]
         for herbivoreIndex in range(len(self.herbivores)):
@@ -167,9 +231,22 @@ class Instance:
         self.carnivores+=newBorns
 
 
+    def fourmisAct(self):
+        newBorns=[]
+        for fourmiIndex in range(len(self.fourmis)):
+            fourmi = self.fourmis[fourmiIndex]
+            if fourmi.health > 0:
+                fourmi.act(self.dish.grasses)
+                fourmi.eatCarriedFood()
+                fourmi.run()
+                fourmi.dying()
+
+
+
     def cellsAct(self):
         self.herbivoresAct()
         self.carnivoresAct()
+        self.fourmisAct()
 
     def updateDish(self):
         self.dish.regrowEatenGrasses()
