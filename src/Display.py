@@ -50,7 +50,11 @@ class Display:
                 if fourmi.type == self.TYPE_REINE:
                     pg.draw.circle(self.screen, pg.Color((255, 255, 0)), (fourmi.x, fourmi.y),
                                    fourmi.radius+3)
-                pg.draw.circle(self.screen, pg.Color((fourmi.r,fourmi.g,fourmi.b)), (fourmi.x,fourmi.y), fourmi.radius)
+                if fourmi.isEgg:
+                    pg.draw.circle(self.screen, pg.Color((0, 0, 0)), (fourmi.x, fourmi.y),
+                                   fourmi.radius/2)
+                else:
+                    pg.draw.circle(self.screen, pg.Color((fourmi.r,fourmi.g,fourmi.b)), (fourmi.x,fourmi.y), fourmi.radius)
                 if fourmi.foodCarried != None:
                     pg.draw.circle(self.screen,fourmi.foodCarried.color, (fourmi.x+((fourmi.radius+2)*fourmi.dx),fourmi.y+((fourmi.radius+2)*fourmi.dy)),fourmi.foodCarried.radius)
 

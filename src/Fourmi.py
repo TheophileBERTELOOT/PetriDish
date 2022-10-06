@@ -4,7 +4,7 @@ from src.Agent import EGreedy
 from src.util import aColideWithB
 
 class Fourmi:
-    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,type,colonieId,TYPE_REINE,TYPE_OUVRIERE):
+    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,type,colonieId,TYPE_REINE,TYPE_OUVRIERE):
         self.x = x
         self.y = y
         self.dx = dx
@@ -14,6 +14,7 @@ class Fourmi:
         self.b = b
         self.TYPE_REINE = TYPE_REINE
         self.TYPE_OUVRIERE=TYPE_OUVRIERE
+        self.timeInEggForm=timeInEggForm
         self.type=type
         self.initialRadius = radius
         self.colonieId=colonieId
@@ -23,6 +24,8 @@ class Fourmi:
         self.hungrinessThreshold = hungrinessThreshold
         self.foodCarried = None
         self.probEatCarriedFood=0.0001
+        self.age = 0
+        self.isEgg=False
         self.hungriness = 0
         self.health = initHealth
         self.radius = radius
@@ -33,7 +36,7 @@ class Fourmi:
         self.agent = EGreedy(2, 1000)
 
     def run(self):
-        if self.type!=self.TYPE_REINE:
+        if self.type!=self.TYPE_REINE and not self.isEgg:
             self.x += self.pas * self.dx
             self.y += self.pas * self.dy
             self.normalize()
@@ -72,7 +75,7 @@ class Fourmi:
             if aColideWithB(self.x, self.y, self.radius, grass.x,
                             grass.y) and self.hungriness > self.hungrinessThreshold:
                 r = np.random.uniform()
-                if r <0.5 and self.foodCarried==None and self.type != self.TYPE_REINE:
+                if r <0.5 and self.foodCarried==None and self.type != self.TYPE_REINE and not self.isEgg:
                     self.foodCarried = grass
                     grass.carried(self.x,self.y)
                 else:
@@ -88,8 +91,15 @@ class Fourmi:
     def act(self, grasses):
         self.agent.play(self, grasses)
 
+    def isHatched(self):
+        if self.age >= self.timeInEggForm and self.nbAte>=self.reproductionThreshold and self.isEgg:
+            self.isEgg = False
+            self.age = 0
+
     def dying(self):
         self.health -= 1
+        if self.isEgg :
+            self.age+=1
         self.radius = int(self.initialRadius * (self.health / self.initHealth))
         if self.radius > self.initialRadius:
             self.radius = self.initialRadius

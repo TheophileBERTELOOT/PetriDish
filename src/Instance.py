@@ -11,7 +11,7 @@ class Instance:
     def __init__(self,nbHerbivore,maxX,maxY,
                  herbiboreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,herbivoreHungrinessThreshold,
                  nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,carnivoreHungrinessThreshold,
-                 nbFourmiPerColonie,nbFourmiColonie, fourmiInitRadius, fourmiInitHealth, fourmiBonusHealthWhenEat, fourmiReproductionThreshold,
+                 nbFourmiPerColonie,nbFourmiColonie, fourmiInitRadius, fourmiInitHealth, fourmiBonusHealthWhenEat, fourmiReproductionThreshold,timeInEggForm,
                  fourmiHungrinessThreshold,
                  herbivorePas,carnivorePas,fourmiPas,nbGrass,grassRadius,grassZoneEditRadius):
         self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius)
@@ -36,6 +36,7 @@ class Instance:
         self.fourmiBonusHealthWhenEat=fourmiBonusHealthWhenEat
         self.fourmiReproductionThreshold=fourmiReproductionThreshold
         self.fourmiHungrinessThreshold=fourmiHungrinessThreshold
+        self.timeInEggForm=timeInEggForm
 
         self.grassRadius=grassRadius
         self.nbGrass=nbGrass
@@ -157,14 +158,16 @@ class Instance:
             bonusHealth = self.fourmiBonusHealthWhenEat
             reproductionThreshold = self.fourmiReproductionThreshold
             hungrinessThreshold = self.fourmiHungrinessThreshold
+            timeInEggForm = self.timeInEggForm
             pas = self.fourmiPas
-            fourmi = Fourmi(x, y, dx, dy, color[0],color[1],color[2], radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
+            fourmi = Fourmi(x, y, dx, dy, color[0],color[1],color[2], radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,timeInEggForm,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
         else:
-            x = parent.x
-            y = parent.y
+
             angle = random.randint(0, self.maxX)
             dx = np.cos(angle)
             dy = np.sin(angle)
+            x = parent.x+(2*parent.radius)*dx
+            y = parent.y+(2*parent.radius)*dy
             r = parent.r
             g = parent.g
             b = parent.b
@@ -175,7 +178,8 @@ class Instance:
             pas = self.fourmiPas
             hungrinessThreshold = self.fourmiHungrinessThreshold
             colonieId= parent.colonieId
-            fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
+            timeInEggForm = self.timeInEggForm
+            fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,timeInEggForm,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
             fourmi.normalize()
             fourmi.agent = deepcopy(parent.agent)
         return fourmi
@@ -249,19 +253,20 @@ class Instance:
                 fourmi.eatCarriedFood()
                 fourmi.run()
                 fourmi.dying()
+                fourmi.isHatched()
                 if fourmi.type == self.TYPE_REINE:
                     if fourmi.shouldReproduce():
                         deadFourmiFound = False
                         for deadFourmiIndex in range(len(self.fourmis)):
                             deadFourmi = self.fourmis[deadFourmiIndex]
-                            if deadFourmi.health < 0:
+                            if deadFourmi.health < 0 and not deadFourmiFound:
                                 self.fourmis[deadFourmiIndex] = self.initFourmi(parent=fourmi)
+                                self.fourmis[deadFourmiIndex].isEgg = True
                                 deadFourmiFound = True
-                                break
                         if not deadFourmiFound:
                             newBorn = self.initFourmi(parent=fourmi)
+                            newBorn.isEgg = True
                             newBorns.append(newBorn)
-                    print(newBorns)
                     self.fourmis += newBorns
 
 

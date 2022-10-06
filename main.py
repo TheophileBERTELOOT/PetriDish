@@ -25,6 +25,7 @@ carnivoreHungrinessThreshold=25
 
 nbFourmiPerColonie = 10
 nbFourmiColonie = 2
+timeInEggForm = 500
 fourmiInitRadius=20
 fourmiInitHealth=100000
 fourmiBonusHealthWhenEat=10000
@@ -42,7 +43,7 @@ display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y)
 instance = Instance(nbHerbivore,SCREEN_SIZE_X,SCREEN_SIZE_Y,
                     herbivoreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,herbivoreHungrinessThreshold,
                     nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,carnivoreHungrinessThreshold,
-                    nbFourmiPerColonie,nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,
+                    nbFourmiPerColonie,nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,timeInEggForm,
                     herbivorePas,carnivorePas,fourmiPas,nbGrass,grassRadius,grassZoneEditRadius)
 eventHandler = EventHandler(grassZoneEditRadius)
 
