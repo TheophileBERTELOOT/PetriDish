@@ -176,6 +176,7 @@ class Instance:
             hungrinessThreshold = self.fourmiHungrinessThreshold
             colonieId= parent.colonieId
             fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
+            fourmi.normalize()
             fourmi.agent = deepcopy(parent.agent)
         return fourmi
 
@@ -248,6 +249,20 @@ class Instance:
                 fourmi.eatCarriedFood()
                 fourmi.run()
                 fourmi.dying()
+                if fourmi.type == self.TYPE_REINE:
+                    if fourmi.shouldReproduce():
+                        deadFourmiFound = False
+                        for deadFourmiIndex in range(len(self.fourmis)):
+                            deadFourmi = self.fourmis[deadFourmiIndex]
+                            if deadFourmi.health < 0:
+                                self.fourmis[deadFourmiIndex] = self.initFourmi(parent=fourmi)
+                                deadFourmiFound = True
+                                break
+                        if not deadFourmiFound:
+                            newBorn = self.initFourmi(parent=fourmi)
+                            newBorns.append(newBorn)
+                    print(newBorns)
+                    self.fourmis += newBorns
 
 
 
@@ -260,7 +275,7 @@ class Instance:
         self.dish.regrowEatenGrasses()
 
     def isGoingThroughWall(self):
-        self.dish.isGoingThroughWall(self.herbivores+self.carnivores)
+        self.dish.isGoingThroughWall(self.herbivores+self.carnivores+self.fourmis)
 
 
 

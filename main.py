@@ -32,7 +32,7 @@ fourmiReproductionThreshold=3
 fourmiHungrinessThreshold=25
 
 grassRadius=5
-nbGrass=40
+nbGrass=60
 grassZoneEditRadius=50
 herbivorePas=1
 carnivorePas=1

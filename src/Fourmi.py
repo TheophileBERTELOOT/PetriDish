@@ -37,6 +37,10 @@ class Fourmi:
             self.x += self.pas * self.dx
             self.y += self.pas * self.dy
             self.normalize()
+            if self.foodCarried != None:
+                self.foodCarried.x = self.x+((self.radius+2)*self.dx)
+                self.foodCarried.y = self.y+((self.radius+2)*self.dy)
+
 
     def normalize(self):
         longueur = np.sqrt(self.dx ** 2 + self.dy ** 2)
@@ -68,11 +72,11 @@ class Fourmi:
             if aColideWithB(self.x, self.y, self.radius, grass.x,
                             grass.y) and self.hungriness > self.hungrinessThreshold:
                 r = np.random.uniform()
-                if r <0.5 and self.foodCarried==None:
+                if r <0.5 and self.foodCarried==None and self.type != self.TYPE_REINE:
                     self.foodCarried = grass
                     grass.carried(self.x,self.y)
                 else:
-                    if self.foodCarried !=None and self.foodCarried != grass:
+                    if (self.foodCarried !=None and self.foodCarried != grass) or self.foodCarried == None:
                         grass.eaten()
                         self.hasEaten = True
                         self.health += self.bonusHealth
@@ -93,7 +97,7 @@ class Fourmi:
             self.radius = 10
 
     def shouldReproduce(self):
-        if self.nbAte >= self.reproductionThreshold:
+        if self.nbAte >= self.reproductionThreshold and self.type == self.TYPE_REINE:
             self.nbAte = 0
             self.nbOffspring += 1
             return True
