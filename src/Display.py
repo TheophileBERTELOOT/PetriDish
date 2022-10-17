@@ -1,4 +1,5 @@
 import pygame as pg
+import numpy as np
 
 class Display:
     def __init__(self,SCREEN_SIZE_X,SCREEN_SIZE_Y):
@@ -16,7 +17,7 @@ class Display:
         self.screen.fill((255, 255, 255))
         self.displayHerbivores(herbivores)
         self.displayCarnivores(carnivores)
-        self.displayFourmis(fourmis)
+        self.displayFourmis(fourmis,eventHandler)
         self.displayDish(dish,eventHandler)
         self.displayInformation()
         self.displayInstructions(eventHandler.grassEditMode)
@@ -40,23 +41,29 @@ class Display:
         self.nbHerbivore=0
         for herbivore in herbivores:
             if herbivore.health>0:
-                pg.draw.circle(self.screen, pg.Color((herbivore.r,herbivore.g,herbivore.b)), (herbivore.x,herbivore.y), herbivore.radius)
+                pg.draw.circle(self.screen, pg.Color((herbivore.r,herbivore.g,herbivore.b)), herbivore.coordinate, herbivore.radius)
                 self.nbHerbivore+=1
 
-    def displayFourmis(self,fourmis):
+    def displayFourmis(self,fourmis,eventHandler):
         self.nbFourmis=0
         for fourmi in fourmis:
             if fourmi.health>0:
                 if fourmi.type == self.TYPE_REINE:
-                    pg.draw.circle(self.screen, pg.Color((255, 255, 0)), (fourmi.x, fourmi.y),
+                    pg.draw.circle(self.screen, pg.Color((255, 255, 0)), fourmi.coordinate,
                                    fourmi.radius+3)
                 if fourmi.isEgg:
-                    pg.draw.circle(self.screen, pg.Color((0, 0, 0)), (fourmi.x, fourmi.y),
+                    pg.draw.circle(self.screen, pg.Color((0, 0, 0)), fourmi.coordinate,
                                    fourmi.radius/2)
                 else:
-                    pg.draw.circle(self.screen, pg.Color((fourmi.r,fourmi.g,fourmi.b)), (fourmi.x,fourmi.y), fourmi.radius)
+                    pg.draw.circle(self.screen, pg.Color((fourmi.r,fourmi.g,fourmi.b)), fourmi.coordinate, fourmi.radius)
                 if fourmi.foodCarried != None:
-                    pg.draw.circle(self.screen,fourmi.foodCarried.color, (fourmi.x+((fourmi.radius+2)*fourmi.dx),fourmi.y+((fourmi.radius+2)*fourmi.dy)),fourmi.foodCarried.radius)
+                    foodCarriedCoordinate = fourmi.coordinate + np.array([((fourmi.radius+2)*fourmi.dx),((fourmi.radius+2)*fourmi.dy)])
+                    pg.draw.circle(self.screen,fourmi.foodCarried.color, foodCarriedCoordinate,fourmi.foodCarried.radius)
+
+                if eventHandler.seeVisionRay:
+                    anglePerRay = 2*np.pi/fourmi.fourmiNbRay
+                    for indexRay in range(fourmi.fourmiNbRay):
+                        pg.draw.line(self.screen,pg.Color((fourmi.r,fourmi.g,fourmi.b)),fourmi.coordinate,fourmi.visionRayCoordinate[indexRay])
 
                 self.nbFourmis+=1
 
@@ -65,14 +72,14 @@ class Display:
         for carnivore in carnivores:
             if carnivore.health>0:
                 pg.draw.circle(self.screen, pg.Color((carnivore.r, 0, 0)),
-                               (carnivore.x, carnivore.y), carnivore.radius+2)
-                pg.draw.circle(self.screen, pg.Color((carnivore.r,carnivore.g,carnivore.b)), (carnivore.x,carnivore.y), carnivore.radius)
+                               carnivore.coordinate, carnivore.radius+2)
+                pg.draw.circle(self.screen, pg.Color((carnivore.r,carnivore.g,carnivore.b)), carnivore.coordinate, carnivore.radius)
                 self.nbCarnivore += 1
 
     def displayGrasses(self,grasses):
         for grass in grasses:
             if not grass.isCarried:
-                pg.draw.circle(self.screen, grass.color, (grass.x,grass.y), grass.radius)
+                pg.draw.circle(self.screen, grass.color, grass.coordinate, grass.radius)
 
     def displayGrassesEditZones(self,dish):
         for zone in dish.shouldGrowCoordinate:

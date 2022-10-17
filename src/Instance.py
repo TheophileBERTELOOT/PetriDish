@@ -11,11 +11,10 @@ class Instance:
     def __init__(self,nbHerbivore,maxX,maxY,
                  herbiboreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,herbivoreHungrinessThreshold,
                  nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,carnivoreHungrinessThreshold,
-                 nbFourmiPerColonie,nbFourmiColonie, fourmiInitRadius, fourmiInitHealth, fourmiBonusHealthWhenEat, fourmiReproductionThreshold,timeInEggForm,
-                 fourmiHungrinessThreshold,
+                 nbFourmiPerColonie,nbFourmiColonie, fourmiInitRadius, fourmiInitHealth, fourmiBonusHealthWhenEat, fourmiReproductionThreshold,fourmiHungrinessThreshold,timeInEggForm,fourmiSenseRadius,fourmiNbRay,
+
                  herbivorePas,carnivorePas,fourmiPas,nbGrass,grassRadius,grassZoneEditRadius):
         self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius)
-
         self.maxX=maxX
         self.maxY=maxY
 
@@ -37,6 +36,8 @@ class Instance:
         self.fourmiReproductionThreshold=fourmiReproductionThreshold
         self.fourmiHungrinessThreshold=fourmiHungrinessThreshold
         self.timeInEggForm=timeInEggForm
+        self.fourmiSenseRadius = fourmiSenseRadius
+        self.fourmiNbRay=fourmiNbRay
 
         self.grassRadius=grassRadius
         self.nbGrass=nbGrass
@@ -67,7 +68,7 @@ class Instance:
         if parent == None:
             x = random.randint(0, self.maxX)
             y = random.randint(0, self.maxY)
-            angle = random.randint(0, self.maxX)
+            angle = random.randint(-self.maxX, self.maxX)
             dx = np.cos(angle)
             dy = np.sin(angle)
             r = random.randint(0, 255)
@@ -81,9 +82,9 @@ class Instance:
             pas = self.herbivorePas
             herbivore = Herbivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas)
         else:
-            x = parent.x
-            y = parent.y
-            angle = random.randint(0, self.maxX)
+            x = parent.coordinate[0]
+            y = parent.coordinate[1]
+            angle = random.randint(-self.maxX, self.maxX)
             dx = np.cos(angle)
             dy = np.sin(angle)
             r = parent.r
@@ -123,8 +124,8 @@ class Instance:
             pas = self.carnivorePas
             carnivore = Carnivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas)
         else:
-            x = parent.x
-            y = parent.y
+            x = parent.coordinate[0]
+            y = parent.coordinate[1]
             angle = random.randint(0, self.maxX)
             dx = np.cos(angle)
             dy = np.sin(angle)
@@ -159,15 +160,18 @@ class Instance:
             reproductionThreshold = self.fourmiReproductionThreshold
             hungrinessThreshold = self.fourmiHungrinessThreshold
             timeInEggForm = self.timeInEggForm
+            fourmiSenseRadius = self.fourmiSenseRadius
             pas = self.fourmiPas
-            fourmi = Fourmi(x, y, dx, dy, color[0],color[1],color[2], radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,timeInEggForm,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
+            fourmiNbRay = self.fourmiNbRay
+            fourmi = Fourmi(x, y, dx, dy, color[0],color[1],color[2], radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold,
+                            pas,timeInEggForm,fourmiSenseRadius,fourmiNbRay,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
         else:
 
             angle = random.randint(0, self.maxX)
             dx = np.cos(angle)
             dy = np.sin(angle)
-            x = parent.x+(2*parent.radius)*dx
-            y = parent.y+(2*parent.radius)*dy
+            x = parent.coordinate[0]+(2*parent.radius)*dx
+            y = parent.coordinate[1]+(2*parent.radius)*dy
             r = parent.r
             g = parent.g
             b = parent.b
@@ -179,7 +183,10 @@ class Instance:
             hungrinessThreshold = self.fourmiHungrinessThreshold
             colonieId= parent.colonieId
             timeInEggForm = self.timeInEggForm
-            fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas,timeInEggForm,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
+            fourmiSenseRadius = self.fourmiSenseRadius
+            fourmiNbRay=self.fourmiNbRay
+            fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold,
+                            pas,timeInEggForm,fourmiSenseRadius,fourmiNbRay,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
             fourmi.normalize()
             fourmi.agent = deepcopy(parent.agent)
         return fourmi
@@ -254,6 +261,7 @@ class Instance:
                 fourmi.run()
                 fourmi.dying()
                 fourmi.isHatched()
+                fourmi.smell(self.fourmis)
                 if fourmi.type == self.TYPE_REINE:
                     if fourmi.shouldReproduce():
                         deadFourmiFound = False

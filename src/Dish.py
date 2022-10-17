@@ -38,19 +38,19 @@ class Dish:
                 grass.isEaten = False
                 if self.shouldGrowCoordinate != []:
                     selectedZone = random.choice(self.shouldGrowCoordinate)
-                    grass.x = random.randint(selectedZone[0]-self.grassZoneEditRadius,selectedZone[0]+self.grassZoneEditRadius)
-                    grass.y = random.randint(selectedZone[1] - self.grassZoneEditRadius,selectedZone[1] + self.grassZoneEditRadius)
+                    grass.coordinate[0] = random.randint(selectedZone[0]-self.grassZoneEditRadius,selectedZone[0]+self.grassZoneEditRadius)
+                    grass.coordinate[1] = random.randint(selectedZone[1] - self.grassZoneEditRadius,selectedZone[1] + self.grassZoneEditRadius)
                 else:
-                    grass.x = random.randint(0,self.maxX)
-                    grass.y = random.randint(0, self.maxY)
+                    grass.coordinate[0] = random.randint(0,self.maxX)
+                    grass.coordinate[1] = random.randint(0, self.maxY)
 
     def isGoingThroughWall(self,cells):
         for cell in cells:
-            if cell.x<0:
-                cell.x = self.maxX
-            if cell.x>self.maxX:
-                cell.x = 0
-            if cell.y<0:
-                cell.y=self.maxY
-            if cell.y>self.maxY:
-                cell.y=0
+            if cell.coordinate[0]<0:
+                cell.coordinate[0] = self.maxX
+            if cell.coordinate[0]>self.maxX:
+                cell.coordinate[0] = 0
+            if cell.coordinate[1]<0:
+                cell.coordinate[1]=self.maxY
+            if cell.coordinate[1]>self.maxY:
+                cell.coordinate[1]=0

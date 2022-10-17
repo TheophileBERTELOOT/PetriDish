@@ -6,8 +6,7 @@ from src.util import aColideWithB
 
 class Herbivore:
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas):
-        self.x=x
-        self.y=y
+        self.coordinate=np.array([x,y],dtype=float)
         self.dx=dx
         self.dy=dy
         self.r=r
@@ -28,8 +27,8 @@ class Herbivore:
         self.agent=EGreedy(2,1000)
 
     def run(self):
-        self.x+=self.pas*self.dx
-        self.y+=self.pas*self.dy
+        self.coordinate[0]+=self.pas*self.dx
+        self.coordinate[1]+=self.pas*self.dy
         self.normalize()
 
     def normalize(self):
@@ -40,7 +39,7 @@ class Herbivore:
     def eat(self,grasses):
         self.hasEaten=False
         for grass in grasses:
-            if aColideWithB(self.x,self.y,self.radius,grass.x,grass.y) and self.hungriness >self.hungrinessThreshold:
+            if aColideWithB(self.coordinate[0],self.coordinate[1],self.radius,grass.coordinate[0],grass.coordinate[1]) and self.hungriness >self.hungrinessThreshold:
                 grass.eaten()
                 self.hasEaten=True
                 self.health+=self.bonusHealth
