@@ -20,8 +20,32 @@ class Display:
         self.displayFourmis(fourmis,eventHandler)
         self.displayDish(dish,eventHandler)
         self.displayInformation()
+        self.displaySelectedCellInfo(eventHandler.selectedCell)
         self.displayInstructions(eventHandler.grassEditMode)
         pg.display.flip()
+
+    def displaySelectedCellInfo(self,cell):
+        if cell != None:
+            width = 150
+            height = 100
+            offset = 20 + cell.radius
+            leftCornerX = cell.coordinate[0]-width/2
+            leftCornerY =  cell.coordinate[1]-height - offset
+            leftCornerTriangleX =  cell.coordinate[0]-10
+            leftCornerTriangleY = cell.coordinate[1] - offset
+            rightCornerTriangleX = cell.coordinate[0] + 10
+            rightCornerTriangleY = cell.coordinate[1] - offset
+            bottomCornerTriangleX = cell.coordinate[0]
+            bottomCornerTriangleY = cell.coordinate[1] - cell.radius
+
+            pg.draw.rect(self.screen, pg.Color((255,255,153)), pg.Rect(leftCornerX,leftCornerY,width,height),0,border_radius=0)
+            pg.draw.polygon(self.screen,pg.Color((255,255,153)),[(leftCornerTriangleX,leftCornerTriangleY),
+                                                                 (rightCornerTriangleX,rightCornerTriangleY),
+                                                                 (bottomCornerTriangleX,bottomCornerTriangleY)])
+            health = self.font.render('Health : '+str(cell.health), True, (0, 0, 0))
+            self.screen.blit(health,(leftCornerX+5,leftCornerY+5))
+
+
 
     def displayInformation(self):
         nbHerbivoreTxt = self.font.render('NbHerbivore : '+str(self.nbHerbivore), True,(0,0,0))
