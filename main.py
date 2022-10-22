@@ -24,8 +24,8 @@ carnivoreBonusHealthWhenEat=10000
 carnivoreReproductionThreshold=3
 carnivoreHungrinessThreshold=25
 
-nbFourmiPerColonie = 4
-nbFourmiColonie = 3
+nbFourmiPerColonie = 2
+nbFourmiColonie = 1
 timeInEggForm = 500
 fourmiInitRadius=20
 fourmiInitHealth=10000
@@ -34,11 +34,11 @@ fourmiReproductionThreshold=3
 fourmiHungrinessThreshold=25
 fourmiSenseRadius=150
 fourmiNbRay = 10
-fourmiAngleOfVision = np.pi/4
+fourmiAngleOfVision = np.pi*2
 
 
 grassRadius=5
-nbGrass=60
+nbGrass=20
 grassZoneEditRadius=50
 herbivorePas=1
 carnivorePas=1

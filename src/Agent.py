@@ -30,21 +30,18 @@ class EGreedy:
 
 
     def applyAction(self,cell,selectedAction):
-        if cell.dx>=0 and cell.dy>=0:
-            angle = np.arccos(cell.dx)
-        if cell.dx<=0 and cell.dy>=0:
-            angle = np.arccos(cell.dx)
-        if cell.dx>=0 and cell.dy<=0:
-            angle = -np.arcsin(cell.dx)
-        if cell.dx<=0 and cell.dy<=0:
-            angle = -np.arccos(cell.dx)
-
+        angle = cell.angle
 
         if selectedAction == 0:
             angle+=np.pi/12
-        else:
+            cell.dx = np.cos(angle)
+            cell.dy = np.sin(angle)
+        elif selectedAction == 1:
             angle-=np.pi/12
-        cell.dx=np.cos(angle)
-        cell.dy=np.sin(angle)
+            cell.dx = np.cos(angle)
+            cell.dy = np.sin(angle)
+        else:
+            angle = angle
+
         cell.normalize()
 

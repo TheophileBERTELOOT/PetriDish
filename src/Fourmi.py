@@ -2,7 +2,7 @@ import numpy as np
 
 from src.Agent import EGreedy
 from src.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint,calcAngle
-
+from src.Qlearning import Qlearning
 class Fourmi:
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,
                  fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId,TYPE_REINE,TYPE_OUVRIERE):
@@ -13,6 +13,7 @@ class Fourmi:
         self.r = r
         self.g = g
         self.b = b
+        self.color = pg.Color((r,g,b))
         self.TYPE_REINE = TYPE_REINE
         self.TYPE_OUVRIERE=TYPE_OUVRIERE
         self.timeInEggForm=timeInEggForm
@@ -39,7 +40,8 @@ class Fourmi:
         self.fourmiSenseRadius = fourmiSenseRadius
         self.fourmiNbRay=fourmiNbRay
         self.fourmiAngleOfVision =fourmiAngleOfVision
-        self.agent = EGreedy(2, 1000)
+        # self.agent = EGreedy(2, 1000)
+        self.agent = Qlearning(3,self.fourmiNbRay,2)
         self.visionRayCoordinate = []
         self.visionRayLength = []
         self.visionRayObject = []
@@ -92,10 +94,10 @@ class Fourmi:
 
     def updateVisionRay(self,indexRay,L,E,C,r,type):
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
-        lengthRay = calcDistanceBetweenTwoPoint(E, C) - r
-        self.visionRayCoordinate[indexRay][0] = self.coordinate[0] + lengthRay * (np.cos(self.angle + anglePerRay * indexRay))
+        lengthRay = calcDistanceBetweenTwoPoint(E, C)
+        self.visionRayCoordinate[indexRay][0] = self.coordinate[0] + lengthRay * (np.cos(1.5*self.angle  + anglePerRay * indexRay))
         self.visionRayCoordinate[indexRay][1] = self.coordinate[1] + lengthRay * (
-            np.sin(self.angle + anglePerRay * indexRay))
+            np.sin(1.5*self.angle + anglePerRay * indexRay))
         self.visionRayLength[indexRay] = lengthRay
         self.visionRayObject[indexRay] = type
 
