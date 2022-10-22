@@ -13,7 +13,7 @@ class Instance:
                  nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,carnivoreHungrinessThreshold,
                  nbFourmiPerColonie,nbFourmiColonie, fourmiInitRadius, fourmiInitHealth, fourmiBonusHealthWhenEat,
                  fourmiReproductionThreshold,fourmiHungrinessThreshold,timeInEggForm,fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,
-                 herbivorePas,carnivorePas,fourmiPas,nbGrass,grassRadius,grassZoneEditRadius):
+                 herbivorePas,carnivorePas,fourmiPas,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold):
         self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius)
         self.maxX=maxX
         self.maxY=maxY
@@ -50,10 +50,14 @@ class Instance:
         self.carnivorePas=carnivorePas
         self.fourmiPas=fourmiPas
 
+        self.bodyDecayingThreshold=bodyDecayingThreshold
+
         self.grassZoneEditRadius = grassZoneEditRadius
         self.herbivores = []
         self.carnivores = []
         self.fourmis=[]
+
+        self.deadBodies = []
 
         self.TYPE_REINE = 0
         self.TYPE_OUVRIERE=1
@@ -256,10 +260,11 @@ class Instance:
 
     def fourmisAct(self):
         newBorns=[]
+        fourmiToRemove=[]
         for fourmiIndex in range(len(self.fourmis)):
             fourmi = self.fourmis[fourmiIndex]
             if fourmi.health > 0:
-                fourmi.act(self.dish.grasses)
+                fourmi.act(self.dish.grasses,self.deadBodies)
                 fourmi.eatCarriedFood()
                 fourmi.run()
                 fourmi.dying()
@@ -267,18 +272,24 @@ class Instance:
                 fourmi.smell(self.fourmis,self.dish.grasses)
                 if fourmi.type == self.TYPE_REINE:
                     if fourmi.shouldReproduce():
-                        deadFourmiFound = False
-                        for deadFourmiIndex in range(len(self.fourmis)):
-                            deadFourmi = self.fourmis[deadFourmiIndex]
-                            if deadFourmi.health < 0 and not deadFourmiFound:
-                                self.fourmis[deadFourmiIndex] = self.initFourmi(parent=fourmi)
-                                self.fourmis[deadFourmiIndex].isEgg = True
-                                deadFourmiFound = True
-                        if not deadFourmiFound:
-                            newBorn = self.initFourmi(parent=fourmi)
-                            newBorn.isEgg = True
-                            newBorns.append(newBorn)
+                        newBorn = self.initFourmi(parent=fourmi)
+                        newBorn.isEgg = True
+                        newBorns.append(newBorn)
                     self.fourmis += newBorns
+            else:
+                if fourmi not in self.deadBodies:
+                    self.deadBodies.append(fourmi)
+                    fourmi.radius = self.grassRadius
+                    fourmi.r = 255
+                    fourmi.g = 0
+                    fourmi.b = 0
+                if fourmi.health < self.bodyDecayingThreshold:
+                    fourmiToRemove.append(fourmi)
+        for fourmi in fourmiToRemove:
+            self.fourmis.remove(fourmi)
+            self.deadBodies.remove(fourmi)
+
+
 
 
 

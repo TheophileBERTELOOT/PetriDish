@@ -64,8 +64,10 @@ class Display:
                     anglePerRay = fourmi.fourmiAngleOfVision/fourmi.fourmiNbRay
                     for indexRay in range(fourmi.fourmiNbRay):
                         pg.draw.line(self.screen,pg.Color((fourmi.r,fourmi.g,fourmi.b)),fourmi.coordinate,fourmi.visionRayCoordinate[indexRay])
+                self.nbFourmis += 1
+            else:
+                pg.draw.circle(self.screen, pg.Color((fourmi.r,fourmi.g,fourmi.b)), fourmi.coordinate, fourmi.radius)
 
-                self.nbFourmis+=1
 
     def displayCarnivores(self,carnivores):
         self.nbCarnivore=0

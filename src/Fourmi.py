@@ -33,6 +33,8 @@ class Fourmi:
         self.nbOffspring = 0
         self.nbAte = 0
         self.hasEaten = False
+        self.isCarried=False
+        self.isEaten = False
         self.fourmiSenseRadius = fourmiSenseRadius
         self.fourmiNbRay=fourmiNbRay
         self.fourmiAngleOfVision =fourmiAngleOfVision
@@ -139,18 +141,18 @@ class Fourmi:
 
 
 
-    def eat(self, grasses):
+    def eat(self, foods):
         self.hasEaten = False
-        for grass in grasses:
-            if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, grass.coordinate[0],
-                            grass.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
+        for food in foods:
+            if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
+                            food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
                 r = np.random.uniform()
                 if r <0.5 and self.foodCarried==None and self.type != self.TYPE_REINE and not self.isEgg:
-                    self.foodCarried = grass
-                    grass.carried(self.coordinate[0],self.coordinate[1])
+                    self.foodCarried = food
+                    food.carried(self.coordinate[0],self.coordinate[1])
                 else:
-                    if (self.foodCarried !=None and self.foodCarried != grass) or self.foodCarried == None:
-                        grass.eaten()
+                    if (self.foodCarried !=None and self.foodCarried != food) or self.foodCarried == None:
+                        food.eaten()
                         self.hasEaten = True
                         self.health += self.bonusHealth
                         self.nbAte += 1
@@ -158,8 +160,9 @@ class Fourmi:
         if not self.hasEaten:
             self.hungriness += 1
 
-    def act(self, grasses):
-        self.agent.play(self, grasses)
+    def act(self, grasses,deadBodies):
+        food = grasses + deadBodies
+        self.agent.play(self, food)
 
     def isHatched(self):
         if self.age >= self.timeInEggForm and self.nbAte>=self.reproductionThreshold and self.isEgg:
@@ -183,4 +186,13 @@ class Fourmi:
             return True
         return False
 
+
+    def carried(self,x,y):
+        self.isCarried = True
+        self.coordinate = np.array([x,y])
+
+    def eaten(self):
+        self.health = -99999
+        self.isEaten = True
+        self.isCarried = False
 
