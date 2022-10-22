@@ -34,7 +34,7 @@ fourmiReproductionThreshold=3
 fourmiHungrinessThreshold=25
 fourmiSenseRadius=150
 fourmiNbRay = 10
-fourmiAngleOfVision = 2*np.pi
+fourmiAngleOfVision = np.pi/4
 
 
 grassRadius=5
