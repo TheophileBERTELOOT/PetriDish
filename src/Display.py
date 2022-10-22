@@ -85,7 +85,6 @@ class Display:
                     pg.draw.circle(self.screen,fourmi.foodCarried.color, foodCarriedCoordinate,fourmi.foodCarried.radius)
 
                 if eventHandler.seeVisionRay:
-                    anglePerRay = fourmi.fourmiAngleOfVision/fourmi.fourmiNbRay
                     for indexRay in range(fourmi.fourmiNbRay):
                         pg.draw.line(self.screen,pg.Color((fourmi.r,fourmi.g,fourmi.b)),fourmi.coordinate,fourmi.visionRayCoordinate[indexRay])
                 self.nbFourmis += 1

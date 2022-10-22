@@ -25,3 +25,15 @@ def lineColideWithCircle(L,E,C,r):
 
 def  calcDistanceBetweenTwoPoint(p1,p2):
     return np.sqrt((p2[0]-p1[0])**2 + (p2[1]-p1[1])**2)
+
+def calcAngle(cos,sin):
+    angle1 = np.arccos(cos)
+    angle2 = np.arcsin(sin)
+    if angle1 >=0 and angle2>=0:
+        return angle1
+    elif angle1 < 0 and angle2 > 0:
+        return angle1
+    elif angle1 >0 and angle2 <0:
+        return angle2
+    elif angle1 <0 and angle2 <0 :
+        return np.pi + angle1

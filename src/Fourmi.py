@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.Agent import EGreedy
-from src.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint
+from src.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint,calcAngle
 
 class Fourmi:
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,
@@ -9,6 +9,7 @@ class Fourmi:
         self.coordinate=np.array([x,y],dtype=float)
         self.dx = dx
         self.dy = dy
+        self.angle = calcAngle(dx,dy)
         self.r = r
         self.g = g
         self.b = b
@@ -67,6 +68,7 @@ class Fourmi:
         longueur = np.sqrt(self.dx ** 2 + self.dy ** 2)
         self.dx /= longueur
         self.dy /= longueur
+        self.angle = calcAngle(self.dx,self.dy)
 
 
     def eatCarriedFood(self):
@@ -91,9 +93,9 @@ class Fourmi:
     def updateVisionRay(self,indexRay,L,E,C,r,type):
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
         lengthRay = calcDistanceBetweenTwoPoint(E, C) - r
-        self.visionRayCoordinate[indexRay][0] = self.coordinate[0] + lengthRay * (np.cos(anglePerRay * indexRay))
+        self.visionRayCoordinate[indexRay][0] = self.coordinate[0] + lengthRay * (np.cos(self.angle + anglePerRay * indexRay))
         self.visionRayCoordinate[indexRay][1] = self.coordinate[1] + lengthRay * (
-            np.sin(anglePerRay * indexRay))
+            np.sin(self.angle + anglePerRay * indexRay))
         self.visionRayLength[indexRay] = lengthRay
         self.visionRayObject[indexRay] = type
 
@@ -101,9 +103,9 @@ class Fourmi:
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
         self.visionRayCoordinate[indexRay][0] = self.coordinate[0] + lengthRay * (
-            np.cos(anglePerRay * indexRay))
+            np.cos(self.angle + anglePerRay * indexRay))
         self.visionRayCoordinate[indexRay][1] = self.coordinate[1] + lengthRay * (
-            np.sin(anglePerRay * indexRay))
+            np.sin(self.angle + anglePerRay * indexRay))
         self.visionRayObject[indexRay] = None
         self.visionRayLength[indexRay] = lengthRay
 
