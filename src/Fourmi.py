@@ -4,7 +4,8 @@ from src.Agent import EGreedy
 from src.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint
 
 class Fourmi:
-    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,fourmiSenseRadius,fourmiNbRay,type,colonieId,TYPE_REINE,TYPE_OUVRIERE):
+    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,
+                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId,TYPE_REINE,TYPE_OUVRIERE):
         self.coordinate=np.array([x,y],dtype=float)
         self.dx = dx
         self.dy = dy
@@ -34,14 +35,19 @@ class Fourmi:
         self.hasEaten = False
         self.fourmiSenseRadius = fourmiSenseRadius
         self.fourmiNbRay=fourmiNbRay
+        self.fourmiAngleOfVision =fourmiAngleOfVision
         self.agent = EGreedy(2, 1000)
         self.visionRayCoordinate = []
+        self.visionRayLength = []
+        self.visionRayObject = []
         anglePerRay = 2*np.pi/self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
         for indexRay in range(self.fourmiNbRay):
             x = self.coordinate[0] + lengthRay * (np.cos(anglePerRay * indexRay))
             y = self.coordinate[1] + lengthRay * (np.sin(anglePerRay * indexRay))
             self.visionRayCoordinate.append([x,y])
+            self.visionRayLength.append(lengthRay)
+            self.visionRayObject.append(None)
         self.visionRayCoordinate = np.array(self.visionRayCoordinate)
 
 
@@ -80,8 +86,27 @@ class Fourmi:
                     self.foodCarried.y = self.coordinate[1]+self.radius*1.5*self.dy
                     self.foodCarried = None
 
-    def smell(self,fourmis):
-        anglePerRay = 2 * np.pi / self.fourmiNbRay
+    def updateVisionRay(self,indexRay,L,E,C,r,type):
+        anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
+        lengthRay = calcDistanceBetweenTwoPoint(E, C) - r
+        self.visionRayCoordinate[indexRay][0] = self.coordinate[0] + lengthRay * (np.cos(anglePerRay * indexRay))
+        self.visionRayCoordinate[indexRay][1] = self.coordinate[1] + lengthRay * (
+            np.sin(anglePerRay * indexRay))
+        self.visionRayLength[indexRay] = lengthRay
+        self.visionRayObject[indexRay] = type
+
+    def resetVisionRay(self,indexRay):
+        anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
+        lengthRay = self.fourmiSenseRadius + self.radius
+        self.visionRayCoordinate[indexRay][0] = self.coordinate[0] + lengthRay * (
+            np.cos(anglePerRay * indexRay))
+        self.visionRayCoordinate[indexRay][1] = self.coordinate[1] + lengthRay * (
+            np.sin(anglePerRay * indexRay))
+        self.visionRayObject[indexRay] = None
+        self.visionRayLength[indexRay] = lengthRay
+
+    def smell(self,fourmis,grasses):
+        anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
         for indexRay in range(self.fourmiNbRay):
             L = self.visionRayCoordinate[indexRay]
@@ -90,21 +115,26 @@ class Fourmi:
             for fourmi in fourmis:
                 if fourmi != self:
                     C = fourmi.coordinate
-                    r = fourmi.radius
-                    isColiding = lineColideWithCircle(L,E,C,r)
-                    if isColiding :
-                        lengthRay = calcDistanceBetweenTwoPoint(E,C)-r
-                        self.visionRayCoordinate[indexRay][0] = self.coordinate[0] +  lengthRay* (np.cos(anglePerRay * indexRay))
-                        self.visionRayCoordinate[indexRay][1] = self.coordinate[1] + lengthRay * (
-                            np.sin(anglePerRay * indexRay))
-                        isColidingOnce = True
-                        break
+                    if calcDistanceBetweenTwoPoint(C,E) < lengthRay:
+                        r = fourmi.radius
+                        isColiding = lineColideWithCircle(L,E,C,r)
+                        if isColiding :
+                            self.updateVisionRay(indexRay,L,E,C,r,0)
+                            isColidingOnce = True
+                            break
             if not isColidingOnce:
-                lengthRay = self.fourmiSenseRadius + self.radius
-                self.visionRayCoordinate[indexRay][0] = self.coordinate[0] + lengthRay * (
-                    np.cos(anglePerRay * indexRay))
-                self.visionRayCoordinate[indexRay][1] = self.coordinate[1] + lengthRay * (
-                    np.sin(anglePerRay * indexRay))
+                for grass in grasses:
+                    C = grass.coordinate
+                    if calcDistanceBetweenTwoPoint(C, E) < lengthRay:
+                        r = grass.radius
+                        isColiding = lineColideWithCircle(L, E, C, r)
+                        if isColiding:
+                            self.updateVisionRay(indexRay,L,E,C,r,1)
+                            isColidingOnce = True
+                            break
+            if not isColidingOnce:
+                self.resetVisionRay(indexRay)
+
 
 
 

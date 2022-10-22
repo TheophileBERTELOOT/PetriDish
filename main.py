@@ -1,5 +1,5 @@
 import pygame as pg
-
+import numpy as np
 from src.Display import Display
 from src.Instance import Instance
 from src.EventHandler import EventHandler
@@ -9,7 +9,7 @@ running = True
 SCREEN_SIZE_X = 1600
 SCREEN_SIZE_Y = 1000
 
-nbHerbivore = 10
+nbHerbivore = 0
 herbivoreInitRadius=20
 herbivoreInitHealth=10000
 herbivoreBonusHealthWhenEat=10000
@@ -17,7 +17,7 @@ herbivoreReproductionThreshold=2
 herbivoreHungrinessThreshold=75
 
 
-nbCarnivore = 5
+nbCarnivore = 0
 carnivoreInitRadius=20
 carnivoreInitHealth=10000
 carnivoreBonusHealthWhenEat=10000
@@ -25,7 +25,7 @@ carnivoreReproductionThreshold=3
 carnivoreHungrinessThreshold=25
 
 nbFourmiPerColonie = 4
-nbFourmiColonie = 0
+nbFourmiColonie = 3
 timeInEggForm = 500
 fourmiInitRadius=20
 fourmiInitHealth=100000
@@ -34,6 +34,7 @@ fourmiReproductionThreshold=3
 fourmiHungrinessThreshold=25
 fourmiSenseRadius=150
 fourmiNbRay = 10
+fourmiAngleOfVision = 2*np.pi
 
 grassRadius=5
 nbGrass=60
@@ -47,7 +48,7 @@ instance = Instance(nbHerbivore,SCREEN_SIZE_X,SCREEN_SIZE_Y,
                     herbivoreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,herbivoreHungrinessThreshold,
                     nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,carnivoreHungrinessThreshold,
                     nbFourmiPerColonie,nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,
-                    timeInEggForm,fourmiSenseRadius,fourmiNbRay,
+                    timeInEggForm,fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,
                     herbivorePas,carnivorePas,fourmiPas,nbGrass,grassRadius,grassZoneEditRadius)
 eventHandler = EventHandler(grassZoneEditRadius)
 

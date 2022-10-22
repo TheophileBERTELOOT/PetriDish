@@ -11,8 +11,8 @@ class Instance:
     def __init__(self,nbHerbivore,maxX,maxY,
                  herbiboreInitRadius,herbivoreInitHealth,herbivoreBonusHealthWhenEat,herbivoreReproductionThreshold,herbivoreHungrinessThreshold,
                  nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat,carnivoreReproductionThreshold,carnivoreHungrinessThreshold,
-                 nbFourmiPerColonie,nbFourmiColonie, fourmiInitRadius, fourmiInitHealth, fourmiBonusHealthWhenEat, fourmiReproductionThreshold,fourmiHungrinessThreshold,timeInEggForm,fourmiSenseRadius,fourmiNbRay,
-
+                 nbFourmiPerColonie,nbFourmiColonie, fourmiInitRadius, fourmiInitHealth, fourmiBonusHealthWhenEat,
+                 fourmiReproductionThreshold,fourmiHungrinessThreshold,timeInEggForm,fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,
                  herbivorePas,carnivorePas,fourmiPas,nbGrass,grassRadius,grassZoneEditRadius):
         self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius)
         self.maxX=maxX
@@ -38,6 +38,7 @@ class Instance:
         self.timeInEggForm=timeInEggForm
         self.fourmiSenseRadius = fourmiSenseRadius
         self.fourmiNbRay=fourmiNbRay
+        self.fourmiAngleOfVision = fourmiAngleOfVision
 
         self.grassRadius=grassRadius
         self.nbGrass=nbGrass
@@ -163,8 +164,9 @@ class Instance:
             fourmiSenseRadius = self.fourmiSenseRadius
             pas = self.fourmiPas
             fourmiNbRay = self.fourmiNbRay
+            fourmiAngleOfVision = self.fourmiAngleOfVision
             fourmi = Fourmi(x, y, dx, dy, color[0],color[1],color[2], radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold,
-                            pas,timeInEggForm,fourmiSenseRadius,fourmiNbRay,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
+                            pas,timeInEggForm,fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
         else:
 
             angle = random.randint(0, self.maxX)
@@ -185,8 +187,9 @@ class Instance:
             timeInEggForm = self.timeInEggForm
             fourmiSenseRadius = self.fourmiSenseRadius
             fourmiNbRay=self.fourmiNbRay
+            fourmiAngleOfVision = self.fourmiAngleOfVision
             fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold,
-                            pas,timeInEggForm,fourmiSenseRadius,fourmiNbRay,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
+                            pas,timeInEggForm,fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId,self.TYPE_REINE,self.TYPE_OUVRIERE)
             fourmi.normalize()
             fourmi.agent = deepcopy(parent.agent)
         return fourmi
@@ -261,7 +264,7 @@ class Instance:
                 fourmi.run()
                 fourmi.dying()
                 fourmi.isHatched()
-                fourmi.smell(self.fourmis)
+                fourmi.smell(self.fourmis,self.dish.grasses)
                 if fourmi.type == self.TYPE_REINE:
                     if fourmi.shouldReproduce():
                         deadFourmiFound = False
