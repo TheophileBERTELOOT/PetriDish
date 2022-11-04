@@ -1,6 +1,6 @@
 import pygame as pg
-import random
 import numpy as np
+
 class Grass:
     def __init__(self,x,y,radius,maxX,maxY):
         self.coordinate = np.array([x,y])

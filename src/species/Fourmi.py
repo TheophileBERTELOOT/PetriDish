@@ -1,40 +1,35 @@
 import numpy as np
+import pygame as pg
+from enum import Enum
 
+from src.species.Species import Species
 from src.Agent import EGreedy
 from src.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint,calcAngle
 from src.Qlearning import Qlearning
-class Fourmi:
+
+class FourmiType(Enum) :
+    REINE = 0
+    OUVRIERE = 1
+
+
+
+class Fourmi(Species):
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,
-                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId,TYPE_REINE,TYPE_OUVRIERE):
-        self.coordinate=np.array([x,y],dtype=float)
-        self.dx = dx
-        self.dy = dy
-        self.angle = calcAngle(dx,dy)
-        self.r = r
-        self.g = g
-        self.b = b
+                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId):
+        super().__init__(x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas)
+
         self.color = pg.Color((r,g,b))
-        self.TYPE_REINE = TYPE_REINE
-        self.TYPE_OUVRIERE=TYPE_OUVRIERE
+
         self.timeInEggForm=timeInEggForm
         self.type=type
-        self.initialRadius = radius
         self.colonieId=colonieId
-        self.initHealth = initHealth
-        self.bonusHealth = bonusHealth
-        self.reproductionThreshold = reproductionThreshold
-        self.hungrinessThreshold = hungrinessThreshold
+
         self.foodCarried = None
         self.probEatCarriedFood=0.0001
         self.age = 0
         self.isEgg=False
         self.hungriness = 0
-        self.health = initHealth
-        self.radius = radius
-        self.pas = pas
-        self.nbOffspring = 0
-        self.nbAte = 0
-        self.hasEaten = False
+        
         self.isCarried=False
         self.isEaten = False
         self.fourmiSenseRadius = fourmiSenseRadius
@@ -47,6 +42,7 @@ class Fourmi:
         self.visionRayObject = []
         anglePerRay = 2*np.pi/self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
+
         for indexRay in range(self.fourmiNbRay):
             x = self.coordinate[0] + lengthRay * (np.cos(anglePerRay * indexRay))
             y = self.coordinate[1] + lengthRay * (np.sin(anglePerRay * indexRay))
@@ -57,13 +53,21 @@ class Fourmi:
 
 
     def run(self):
-        if self.type!=self.TYPE_REINE and not self.isEgg:
+        if self.type!=FourmiType.REINE and not self.isEgg:
             self.coordinate[0] += self.pas * self.dx
             self.coordinate[1] += self.pas * self.dy
             self.normalize()
             if self.foodCarried != None:
                 self.foodCarried.x = self.coordinate[0]+((self.radius+2)*self.dx)
                 self.foodCarried.y = self.coordinate[1]+((self.radius+2)*self.dy)
+
+    def deviate_obstacles(self) :
+        self.coordinate[0]-= 1/2 * self.pas*self.dx
+        self.coordinate[1]-=1/2 * self.pas*self.dy
+        self.normalize()
+        if self.foodCarried != None:
+            self.foodCarried.x = self.coordinate[0]+((self.radius+2)*self.dx)
+            self.foodCarried.y = self.coordinate[1]+((self.radius+2)*self.dy)
 
 
     def normalize(self):
@@ -151,7 +155,7 @@ class Fourmi:
             if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
                             food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
                 r = np.random.uniform()
-                if r <0.5 and self.foodCarried==None and self.type != self.TYPE_REINE and not self.isEgg:
+                if r <0.5 and self.foodCarried==None and self.type != FourmiType.REINE and not self.isEgg:
                     self.foodCarried = food
                     food.carried(self.coordinate[0],self.coordinate[1])
                 else:
@@ -166,7 +170,8 @@ class Fourmi:
 
     def act(self, grasses,deadBodies):
         food = grasses + deadBodies
-        self.agent.play(self, food)
+        if (self.type == FourmiType.OUVRIERE) :
+            self.agent.play(self, food)
 
     def isHatched(self):
         if self.age >= self.timeInEggForm and self.nbAte>=self.reproductionThreshold and self.isEgg:
@@ -184,7 +189,7 @@ class Fourmi:
             self.radius = 10
 
     def shouldReproduce(self):
-        if self.nbAte >= self.reproductionThreshold and self.type == self.TYPE_REINE:
+        if self.nbAte >= self.reproductionThreshold and self.type == FourmiType.REINE:
             self.nbAte = 0
             self.nbOffspring += 1
             return True

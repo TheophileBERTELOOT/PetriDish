@@ -10,6 +10,7 @@ class EventHandler:
 
 
     def handleEvent(self,e,instance):
+        running = True
         if e.type == pg.QUIT:
             running = False
         if self.grassEditMode:
@@ -23,6 +24,8 @@ class EventHandler:
             pos = pg.mouse.get_pos()
             if e.button == 1:
                 self.selectACell(instance,pos)
+
+        return running
 
 
     def toggleSeeVisionRay(self):

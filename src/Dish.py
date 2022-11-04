@@ -1,8 +1,9 @@
 import pygame as pg
 import random
 from src.Grass import Grass
+from src.Obstacle import Obstacle
 class Dish:
-    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius):
+    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle):
         self.maxX=maxX
         self.maxY=maxY
         self.grassRadius=grassRadius
@@ -10,7 +11,9 @@ class Dish:
         self.grasses = []
         self.shouldGrowCoordinate=[]
         self.grassZoneEditRadius = grassZoneEditRadius
+        self.obstacles = []
         self.initGrasses()
+        self.init_obstacles(positionObstacle)
 
     def addGrassesGrowCoordinates(self,co):
         self.shouldGrowCoordinate.append(co)
@@ -31,6 +34,10 @@ class Dish:
             radius= self.grassRadius
             grass = Grass(x,y,radius,self.maxX,self.maxY)
             self.grasses.append(grass)
+
+    def init_obstacles(self, positionObstacle) :
+        x, y = positionObstacle
+        self.obstacles.append(Obstacle(x,y, 40,40))
 
     def regrowEatenGrasses(self):
         for grass in self.grasses:
@@ -54,3 +61,9 @@ class Dish:
                 cell.coordinate[1]=self.maxY
             if cell.coordinate[1]>self.maxY:
                 cell.coordinate[1]=0
+
+    def isGoingThroughObstacles(self,cell):
+        for obstacle in self.obstacles :
+            isCollide = obstacle.shape.collidepoint(cell.coordinate[0], cell.coordinate[1])
+            if isCollide : return True
+        return False

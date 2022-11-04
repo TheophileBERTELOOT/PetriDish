@@ -2,33 +2,22 @@ import numpy as np
 
 from src.Agent import EGreedy
 from src.util import aColideWithB
+from src.species.Species import Species
 
-
-class Carnivore:
+class Carnivore(Species):
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas):
-        self.coordinate=np.array([x,y],dtype=float)
-        self.dx=dx
-        self.dy=dy
-        self.r=r
-        self.g=g
-        self.b=b
-        self.initialRadius=radius
-        self.initHealth=initHealth
-        self.bonusHealth=bonusHealth
-        self.reproductionThreshold=reproductionThreshold
-        self.hungrinessThreshold=hungrinessThreshold
-        self.hungriness=0
-        self.health=initHealth
-        self.radius=radius
-        self.pas=pas
-        self.nbOffspring=0
-        self.nbAte=0
-        self.hasEaten=False
+        super().__init__(x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas)
+
         self.agent=EGreedy(2,1000)
 
     def run(self):
         self.coordinate[0]+=self.pas*self.dx
         self.coordinate[1]+=self.pas*self.dy
+        self.normalize()
+
+    def deviate_obstacles(self) :
+        self.coordinate[0]-= 1/2 * self.pas*self.dx
+        self.coordinate[1]-=1/2 * self.pas*self.dy
         self.normalize()
 
     def normalize(self):

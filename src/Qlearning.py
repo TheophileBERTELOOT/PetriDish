@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+
 class Qlearning:
     def __init__(self,nbAction,nbRay,nbType):
         self.nbAction = nbAction
@@ -34,8 +35,6 @@ class Qlearning:
 
 
     def play(self,cell,food):
-        if cell.type != cell.TYPE_OUVRIERE:
-            return
         state = self.stateFromRayType(cell.visionRayObject)
         if not self.isFirstTime:
             cell.eat(food)

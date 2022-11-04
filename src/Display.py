@@ -13,11 +13,12 @@ class Display:
         self.screen = pg.display.set_mode((SCREEN_SIZE_X, SCREEN_SIZE_Y))
         self.font = pg.font.Font('freesansbold.ttf', 16)
 
-    def displayAll(self,herbivores,carnivores,fourmis,dish,eventHandler):
+    def displayAll(self,herbivores,carnivores,fourmis,dish, eventHandler):
         self.screen.fill((255, 255, 255))
         self.displayHerbivores(herbivores)
         self.displayCarnivores(carnivores)
         self.displayFourmis(fourmis,eventHandler)
+        self.display_obstacles(dish.obstacles)
         self.displayDish(dish,eventHandler)
         self.displayInformation()
         self.displaySelectedCellInfo(eventHandler.selectedCell)
@@ -115,3 +116,11 @@ class Display:
         self.displayGrasses(dish.grasses)
         if eventHandler.grassEditMode:
             self.displayGrassesEditZones(dish)
+
+    def display_obstacles(self, obstacles) :
+        for obstacle in obstacles :
+            obstacle.update()
+            if (obstacle is not None) :
+            
+                self.screen.blit(obstacle.get_image(), obstacle.get_shape())
+
