@@ -34,6 +34,7 @@ class FourmieCreator(SpeciesCreator):
             parent = self.currentColonieReine
 
         fourmie = self.Create(parent, type)
+        self.numberFourmiesCreatedPerColonie+=1
         self.Update()
         return fourmie
 

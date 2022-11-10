@@ -11,7 +11,6 @@ class EGreedy:
 
     def play(self,cell,food):
         selectedAction=-1
-
         for actionIndex in range(self.nbAction):
             if self.nbTimePlayed[actionIndex]==0:
                 selectedAction = actionIndex

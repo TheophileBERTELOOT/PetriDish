@@ -2,6 +2,7 @@ from .Dish import Dish
 from src.species import Herbivore, Fourmi, Carnivore
 from src.species import FourmiType
 from src.Obstacle import Obstacle
+from src.Qlearning import Qlearning
 import random
 import numpy as np
 from copy import deepcopy
@@ -35,6 +36,15 @@ class Instance(object):
 
         self.grassEditMode = False
 
+        self.agents = {}
+        self.initAgents()
+
+
+
+
+    def initAgents(self):
+        if len(self.fourmis)>0:
+            self.agents['fourmis'] = Qlearning(3,self.fourmis[0].fourmiNbRay,2)
 
     def herbivoresAct(self):
         newBorns=[]
@@ -91,7 +101,10 @@ class Instance(object):
         for fourmiIndex in range(len(self.fourmis)):
             fourmi = self.fourmis[fourmiIndex]
             if fourmi.health > 0:
-                fourmi.act(self.dish.grasses,self.deadBodies)
+                if (fourmi.type == FourmiType.OUVRIERE) :
+                    food = self.dish.grasses + self.deadBodies
+                    self.agents['fourmis'].play(fourmi,food)
+
                 fourmi.eatCarriedFood()
                 if (self.dish.isGoingThroughObstacles(fourmi)) :
                     fourmi.deviate_obstacles()

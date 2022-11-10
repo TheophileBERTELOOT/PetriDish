@@ -7,10 +7,10 @@ from src.species import FourmieCreator, HerbivorCreator, CarnivoreCreator
 
 pg.init()
 running = True
-SCREEN_SIZE_X = 500
-SCREEN_SIZE_Y = 500
+SCREEN_SIZE_X = 1000
+SCREEN_SIZE_Y = 1000
 
-nbHerbivore = 3
+nbHerbivore = 0
 herbivoreInitRadius=20
 herbivoreInitHealth=10000
 herbivoreBonusHealthWhenEat=10000
@@ -18,15 +18,15 @@ herbivoreReproductionThreshold=2
 herbivoreHungrinessThreshold=75
 
 
-nbCarnivore = 5
+nbCarnivore = 0
 carnivoreInitRadius=20
 carnivoreInitHealth=10000
 carnivoreBonusHealthWhenEat=10000
 carnivoreReproductionThreshold=3
 carnivoreHungrinessThreshold=25
 
-nbFourmiPerColonie = 2
-nbFourmiColonie = 1
+nbFourmiPerColonie = 5
+nbFourmiColonie = 2
 timeInEggForm = 500
 fourmiInitRadius=20
 fourmiInitHealth=10000
