@@ -2,9 +2,8 @@ import pygame as pg
 import random
 from src.Grass import Grass
 from src.Obstacle import Obstacle
-from src.species import Fourmi
 class Dish:
-    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacles):
+    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle):
         self.maxX=maxX
         self.maxY=maxY
         self.grassRadius=grassRadius
@@ -14,7 +13,7 @@ class Dish:
         self.grassZoneEditRadius = grassZoneEditRadius
         self.obstacles = []
         self.initGrasses()
-        self.init_obstacles(positionObstacles)
+        self.init_obstacles(positionObstacle)
 
     def addGrassesGrowCoordinates(self,co):
         self.shouldGrowCoordinate.append(co)
@@ -36,10 +35,9 @@ class Dish:
             grass = Grass(x,y,radius,self.maxX,self.maxY)
             self.grasses.append(grass)
 
-    def init_obstacles(self, positionObstacles) :
-        for positionObstacle in positionObstacles :
-            x, y = positionObstacle
-            self.obstacles.append(Obstacle(x,y, 40,40))
+    def init_obstacles(self, positionObstacle) :
+        x, y = positionObstacle
+        self.obstacles.append(Obstacle(x,y, 40,40))
 
     def regrowEatenGrasses(self):
         for grass in self.grasses:
@@ -67,8 +65,5 @@ class Dish:
     def isGoingThroughObstacles(self,cell):
         for obstacle in self.obstacles :
             isCollide = obstacle.shape.collidepoint(cell.coordinate[0], cell.coordinate[1])
-            if isCollide : 
-                if (isinstance(cell, Fourmi)) : 
-                    obstacle.tryGetColonized(cell.colonieId)
-                return True
+            if isCollide : return True
         return False

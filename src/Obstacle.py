@@ -8,8 +8,6 @@ class Obstacle:
         self._pebble = pg.image.load(image)
         self.shape = pg.Rect(left, top, width, height)
         self._pebbleStretchedImage = pg.transform.scale(self._pebble, (self.shape.width, self.shape.height))
-        self.coordinate = np.array([left,top],dtype=float)
-        self.colonieId = None
 
     def update(self):
         self._pebbleStretchedImage = pg.transform.scale(self._pebble, (self.shape.width, self.shape.height))
@@ -19,12 +17,3 @@ class Obstacle:
 
     def get_shape(self) :
         return self.shape
-
-    def isAuntHill(self): 
-        return self.colonieId is not None
-    
-    def tryGetColonized(self, colonieId) :
-        if (self.colonieId is None) :
-            self.colonieId = colonieId
-
-    

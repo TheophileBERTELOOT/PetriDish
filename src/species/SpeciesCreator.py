@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from . import Species
-import settings
 
 class SpeciesCreator(ABC):
     """
@@ -8,9 +7,9 @@ class SpeciesCreator(ABC):
     """
 
     @abstractmethod
-    def __init__(self, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas) :
-        self.maxX = settings.SCREEN_SIZE_X
-        self.maxY = settings.SCREEN_SIZE_Y
+    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas) :
+        self.maxX = maxX
+        self.maxY = maxY
         self.number = number
         self.initRadius = initRadius
         self.initHealth = initHealth
