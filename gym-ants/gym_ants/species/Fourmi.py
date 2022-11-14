@@ -2,9 +2,9 @@ import numpy as np
 import pygame as pg
 from enum import Enum
 
-from src.species.Species import Species
+from gym_ants.species.Species import Species
 from src.Agent import EGreedy
-from src.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint,calcAngle
+from gym_ants.helpers.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint,calcAngle
 from src.Qlearning import Qlearning
 
 class FourmiType(Enum) :
@@ -15,18 +15,17 @@ class FourmiType(Enum) :
 
 class Fourmi(Species):
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,
-                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId):
+                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId, avgLifeExpectancy = 100, seed=42):
         super().__init__(x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas)
 
         self.color = pg.Color((r,g,b))
 
-        self.timeInEggForm=timeInEggForm
         self.type=type
         self.colonieId=colonieId
 
         self.foodCarried = None
         self.probEatCarriedFood=0.0001
-        self.age = 0
+        self.age = -timeInEggForm
         self.isEgg=False
         self.hungriness = 0
         
@@ -50,6 +49,8 @@ class Fourmi(Species):
             self.visionRayLength.append(lengthRay)
             self.visionRayObject.append(None)
         self.visionRayCoordinate = np.array(self.visionRayCoordinate)
+        self.random = np.random.RandomState(seed)
+        self.death_age = self.random.exponential(avgLifeExpectancy)
 
 
     def run(self):
@@ -174,19 +175,26 @@ class Fourmi(Species):
             self.agent.play(self, food)
 
     def isHatched(self):
-        if self.age >= self.timeInEggForm and self.nbAte>=self.reproductionThreshold and self.isEgg:
+        if self.age >= 0 and self.nbAte>=self.reproductionThreshold and self.isEgg:
             self.isEgg = False
             self.age = 0
 
     def dying(self):
         self.health -= 1
-        if self.isEgg :
-            self.age+=1
+        self.age+=1
+        if age >= self.death_age:
+            self.die()
         self.radius = int(self.initialRadius * (self.health / self.initHealth))
         if self.radius > self.initialRadius:
             self.radius = self.initialRadius
         if self.radius < 10:
             self.radius = 10
+
+
+
+    def die(self):
+        self.health = 0
+        self.isDead = True
 
     def shouldReproduce(self):
         if self.nbAte >= self.reproductionThreshold and self.type == FourmiType.REINE:
@@ -201,7 +209,27 @@ class Fourmi(Species):
         self.coordinate = np.array([x,y])
 
     def eaten(self):
-        self.health = -99999
+        self.health = 0
         self.isEaten = True
         self.isCarried = False
+        self.isDead = True 
+
+    def interaction_between_colonies(self, creatures):
+        for creature in creatures:
+            if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, creature.coordinate[0],
+                            creature.coordinate[1]):
+
+                # Si les fourmis qui se rencontrent ne sont pas de la même colonie, elles se battent
+                if creature.colonieId != self.colonieId:
+                    if self.isEgg:
+                        if not self.creature.isEgg:
+                            self.eaten() # L'oeuf se fait manger par la fourmi adverse
+                        else:
+                            continue # Si les deux fourmis sont des oeufs, rien ne se passe
+                    
+                    # Le degré de la blessure va dépendre de la santé des deux fourmis 
+                    injury_degree = self.random.beta(creature.health, self.health)
+                    self.health = int(self.health * injury_prop)
+
+
 

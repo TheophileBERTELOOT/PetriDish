@@ -1,10 +1,10 @@
 import numpy as np
 
 from src.Agent import EGreedy
-from src.util import aColideWithB
-from src.species.Species import Species
+from gym_ants.helpers.util import aColideWithB
+from gym_ants.species.Species import Species
 
-class Herbivore(Species):
+class Carnivore(Species):
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas):
         super().__init__(x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas)
 
@@ -25,11 +25,11 @@ class Herbivore(Species):
         self.dx /= longueur
         self.dy /= longueur
 
-    def eat(self,grasses):
+    def eat(self,herbivores):
         self.hasEaten=False
-        for grass in grasses:
-            if aColideWithB(self.coordinate[0],self.coordinate[1],self.radius,grass.coordinate[0],grass.coordinate[1]) and self.hungriness >self.hungrinessThreshold:
-                grass.eaten()
+        for herbivore in herbivores:
+            if aColideWithB(self.coordinate[0],self.coordinate[1],self.radius,herbivore.coordinate[0],herbivore.coordinate[1]) and herbivore.health>0 and self.hungriness>self.hungrinessThreshold:
+                herbivore.health = 0
                 self.hasEaten=True
                 self.health+=self.bonusHealth
                 self.nbAte+=1
@@ -37,8 +37,8 @@ class Herbivore(Species):
         if not self.hasEaten:
             self.hungriness+=1
 
-    def act(self,grasses):
-        self.agent.play(self,grasses)
+    def act(self,herbivores):
+        self.agent.play(self,herbivores)
 
     def dying(self):
         self.health-=1
@@ -48,11 +48,14 @@ class Herbivore(Species):
         if self.radius<10:
             self.radius=10
 
-    def shouldReproduce(self):
-        if self.nbAte>=self.reproductionThreshold:
-            self.nbAte=0
-            self.nbOffspring+=1
-            return True
+    def shouldReproduce(self,carnivores):
+        for carnivore in carnivores:
+            if carnivore != self:
+                if aColideWithB(self.coordinate[0],self.coordinate[1],self.radius,carnivore.coordinate[0],carnivore.coordinate[1]):
+                    if self.nbAte>=self.reproductionThreshold:
+                        self.nbAte=0
+                        self.nbOffspring+=1
+                        return True
         return False
 
 

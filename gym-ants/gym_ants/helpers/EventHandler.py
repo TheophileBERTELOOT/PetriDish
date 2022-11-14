@@ -1,6 +1,6 @@
 import pygame as pg
 import numpy as np
-from src.util import calcDistanceBetweenTwoPoint
+from gym_ants.helpers.util import calcDistanceBetweenTwoPoint
 class EventHandler:
     def __init__(self,grassZoneEditRadius):
         self.grassZoneEditRadius = grassZoneEditRadius

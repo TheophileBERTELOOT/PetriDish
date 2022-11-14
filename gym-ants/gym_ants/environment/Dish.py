@@ -1,7 +1,7 @@
 import pygame as pg
 import random
-from src.Grass import Grass
-from src.Obstacle import Obstacle
+from gym_ants.environment.Grass import Grass
+from gym_ants.environment.Obstacle import Obstacle
 class Dish:
     def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle):
         self.maxX=maxX

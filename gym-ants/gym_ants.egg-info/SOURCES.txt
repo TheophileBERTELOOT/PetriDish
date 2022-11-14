@@ -1,0 +1,6 @@
+setup.py
+gym_ants.egg-info/PKG-INFO
+gym_ants.egg-info/SOURCES.txt
+gym_ants.egg-info/dependency_links.txt
+gym_ants.egg-info/requires.txt
+gym_ants.egg-info/top_level.txt

@@ -1,8 +1,7 @@
-from .Dish import Dish
-from src.species import Herbivore, Fourmi, Carnivore
-from src.species import FourmiType
-from src.Obstacle import Obstacle
-from src.Qlearning import Qlearning
+from gym_ants.environment.Dish import Dish
+from gym_ants.species import Herbivore, Fourmi, Carnivore
+from gym_ants.species import FourmiType
+from gym_ants.environment.Obstacle import Obstacle
 import random
 import numpy as np
 from copy import deepcopy
@@ -36,15 +35,20 @@ class Instance(object):
 
         self.grassEditMode = False
 
-        self.agents = {}
-        self.initAgents()
+        self.old_value = 0
+        self.old_action = 0
+        self.oldDistance = []
+        self.oldType = []
+
+        #self.agents = {}
+        #self.initAgents()
 
 
 
 
-    def initAgents(self):
+    """def initAgents(self):
         if len(self.fourmis)>0:
-            self.agents['fourmis'] = Qlearning(3,self.fourmis[0].fourmiNbRay,2)
+            self.agents['fourmis'] = Qlearning(3,self.fourmis[0].fourmiNbRay,2)"""
 
     def herbivoresAct(self):
         newBorns=[]
@@ -95,21 +99,29 @@ class Instance(object):
         self.carnivores+=newBorns
 
 
-    def fourmisAct(self):
+    def fourmisAct(self, actions):
         newBorns=[]
         fourmiToRemove=[]
+        rewards, next_states = [], []
+
         for fourmiIndex in range(len(self.fourmis)):
             fourmi = self.fourmis[fourmiIndex]
             if fourmi.health > 0:
                 if (fourmi.type == FourmiType.OUVRIERE) :
                     food = self.dish.grasses + self.deadBodies
-                    self.agents['fourmis'].play(fourmi,food)
+                    #  self.agents['fourmis'].play(fourmi,food)
+                    fourmi.eat(food)
+                    self.applyAction(actions[fourmiIndex])
+                    self.oldType = copy.deepcopy(fourmi.visionRayObject)
+                    self.oldDistance = copy.deepcopy(fourmi.visionRayLength)
+                    
 
                 fourmi.eatCarriedFood()
                 if (self.dish.isGoingThroughObstacles(fourmi)) :
                     fourmi.deviate_obstacles()
                 else :
                     fourmi.run()
+                fourmi.interaction_between_colonies(self.fourmis)
                 fourmi.dying()
                 fourmi.isHatched()
                 fourmi.smell(self.fourmis,self.dish.grasses)
@@ -128,21 +140,67 @@ class Instance(object):
                     fourmi.b = 0
                 if fourmi.health < self.bodyDecayingThreshold:
                     fourmiToRemove.append(fourmi)
+
+            rewards.append(self._get_reward(fourmi))
+            next_states.append(self.stateFromRayType(fourmi))
+
         for fourmi in fourmiToRemove:
             self.fourmis.remove(fourmi)
             self.deadBodies.remove(fourmi)
+        return np.array(next_states), np.array(rewards)
+
+        
+
+    def calcDistanceReward(self,cell):
+        for indexRay in range(len(self.oldDistance)):
+            newType = cell.visionRayObject[indexRay]
+            oldRayType = self.oldType[indexRay]
+            if newType == 1:
+                newDistance = cell.visionRayLength[indexRay]
+                oldRayDistance = self.oldDistance[indexRay]
+                if newDistance<oldRayDistance:
+                    return 50
+
+    def _get_reward(self, cell):
+        if cell.hasEaten:
+            reward = 1000
+        else:
+            return self.calcDistanceReward(cell)
 
 
-    def cellsAct(self):
+    def applyAction(self, cell, selectedAction):
+        angle = cell.angle
+
+        if selectedAction == 0:
+            angle+=np.pi/12
+            cell.dx = np.cos(angle)
+            cell.dy = np.sin(angle)
+        elif selectedAction == 1:
+            angle-=np.pi/12
+            cell.dx = np.cos(angle)
+            cell.dy = np.sin(angle)
+        else:
+            angle = angle
+        cell.normalize()
+
+    def cellsAct(self, actions):
         self.herbivoresAct()
         self.carnivoresAct()
-        self.fourmisAct()
+        next_states, rewards = self.fourmisAct(actions)
+        return next_states, rewards
 
     def updateDish(self):
         self.dish.regrowEatenGrasses()
 
     def isGoingThroughWall(self):
         self.dish.isGoingThroughWall(self.herbivores+self.carnivores+self.fourmis)
+
+    def stateFromRayType(self,rayType):
+        for rayIndex in range(len(rayType)):
+            ray = rayType[rayIndex]
+            if ray == 1:
+                return np.array([rayIndex+1])
+        return np.array([0])
 
 
 
