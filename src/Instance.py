@@ -6,16 +6,17 @@ from src.Qlearning import Qlearning
 import random
 import numpy as np
 from copy import deepcopy
+import settings
 
 
 class Instance(object):
 
-    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, herbivorCreator, carnivorCreator, fourmieCreator, positionObstacle):
+    def __init__(self,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, herbivorCreator, carnivorCreator, fourmieCreator, positionObstacles):
         
         
-        self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle)
-        self.maxX=maxX
-        self.maxY=maxY
+        self.dish = Dish(settings.SCREEN_SIZE_X,settings.SCREEN_SIZE_Y,nbGrass,grassRadius,grassZoneEditRadius, positionObstacles)
+        self.maxX=settings.SCREEN_SIZE_X
+        self.maxY=settings.SCREEN_SIZE_Y
 
         self.grassRadius=grassRadius
         self.nbGrass=nbGrass

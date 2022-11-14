@@ -1,30 +1,45 @@
 import pygame as pg
 import numpy as np
-from src.util import calcDistanceBetweenTwoPoint
+from src.MotionService import MotionService
 class EventHandler:
-    def __init__(self,grassZoneEditRadius):
+    def __init__(self,grassZoneEditRadius, motionService):
         self.grassZoneEditRadius = grassZoneEditRadius
         self.grassEditMode = False
         self.seeVisionRay =  False
-        self.selectedCell = None
+        self.motionService = motionService
 
 
-    def handleEvent(self,e,instance):
+    def handleEvent(self,event,instance):
         running = True
-        if e.type == pg.QUIT:
+        moveUp, moveDown, moveLeft, moveRight = False,False,False,False
+        if event.type == pg.QUIT:
             running = False
         if self.grassEditMode:
             self.handleGrassEditMode(e,instance)
-        if e.type == pg.KEYDOWN:
-            if e.key == pg.K_g:
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_g:
                 self.toggleGrassEditMode()
-            if e.key == pg.K_v:
+            if event.key == pg.K_v:
                 self.toggleSeeVisionRay()
-        if e.type == pg.MOUSEBUTTONUP:
+        if event.type == pg.MOUSEBUTTONUP:
             pos = pg.mouse.get_pos()
-            if e.button == 1:
+            if event.button == 1:
                 self.selectACell(instance,pos)
-
+        if event.type == pg.KEYDOWN:
+            # Change the keyboard variables.
+            if event.key == pg.K_LEFT or event.key == pg.K_a:
+                moveRight = False
+                moveLeft = True
+            if event.key == pg.K_RIGHT or event.key == pg.K_d:
+                moveLeft = False
+                moveRight = True
+            if event.key == pg.K_UP or event.key == pg.K_w:
+                moveDown = False
+                moveUp = True
+            if event.key == pg.K_DOWN or event.key == pg.K_s:
+                moveUp = False
+                moveDown = True
+        self.motionService.MoveObstacle(moveUp, moveDown, moveLeft, moveRight)
         return running
 
 
@@ -43,12 +58,4 @@ class EventHandler:
         self.grassEditMode = not self.grassEditMode
 
     def selectACell(self,instance,pos):
-        arrayPos = np.array(pos)
-        NoCellSelected = True
-        for fourmi in instance.fourmis:
-            if calcDistanceBetweenTwoPoint(fourmi.coordinate,arrayPos)<fourmi.radius:
-                self.selectedCell = fourmi
-                NoCellSelected = False
-                break
-        if NoCellSelected :
-            self.selectedCell = None
+        self.motionService.SelectItem(pos, instance)

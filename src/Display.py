@@ -1,32 +1,45 @@
 import pygame as pg
 import numpy as np
+import settings
 
 class Display:
-    def __init__(self,SCREEN_SIZE_X,SCREEN_SIZE_Y):
-        self.screenSizeX = SCREEN_SIZE_X
-        self.screenSizeY = SCREEN_SIZE_Y
+    def __init__(self, motionService, nbColonieFourmis):
+        self.screenSizeX = settings.SCREEN_SIZE_X
+        self.screenSizeY = settings.SCREEN_SIZE_Y
         self.nbHerbivore = 0
         self.nbCarnivore = 0
         self.nbFourmis = 0
         self.TYPE_REINE = 0
         self.TYPE_OUVRIERE=1
-        self.screen = pg.display.set_mode((SCREEN_SIZE_X, SCREEN_SIZE_Y))
+        self.nbColonieFourmis = nbColonieFourmis
+        self.app = pg.display.set_mode((settings.APP_SIZE_X, settings.SCREEN_SIZE_Y))
+        self.screen = pg.Surface((settings.SCREEN_SIZE_X, settings.SCREEN_SIZE_Y))
         self.font = pg.font.Font('freesansbold.ttf', 16)
+        
+        self.app.fill((42,48,65))
+        
+
+        self.motionService = motionService
 
     def displayAll(self,herbivores,carnivores,fourmis,dish, eventHandler):
         self.screen.fill((255, 255, 255))
+        self.app.fill((42,48,65))
+        self.display_obstacles(dish.obstacles, fourmis)
         self.displayHerbivores(herbivores)
         self.displayCarnivores(carnivores)
         self.displayFourmis(fourmis,eventHandler)
-        self.display_obstacles(dish.obstacles)
+        
         self.displayDish(dish,eventHandler)
         self.displayInformation()
-        self.displaySelectedCellInfo(eventHandler.selectedCell)
+        self.displaySelectedCellInfo()
         self.displayInstructions(eventHandler.grassEditMode)
+        self.app.blit(self.screen, (200,0))
+
         pg.display.flip()
 
-    def displaySelectedCellInfo(self,cell):
-        if cell != None:
+    def displaySelectedCellInfo(self):
+        cell = self.motionService.itemSelected
+        if cell != None and self.motionService.IsFourmiSelected():
             width = 150
             height = 100
             offset = 20 + cell.radius
@@ -49,12 +62,14 @@ class Display:
 
 
     def displayInformation(self):
-        nbHerbivoreTxt = self.font.render('NbHerbivore : '+str(self.nbHerbivore), True,(0,0,0))
-        nbCarnivoreTxt = self.font.render('NbCarnivore : ' + str(self.nbCarnivore), True, (0, 0, 0))
-        nbFourmiTxt = self.font.render('NbFourmi : ' + str(self.nbFourmis), True, (0, 0, 0))
-        self.screen.blit(nbHerbivoreTxt,(10,15))
-        self.screen.blit(nbCarnivoreTxt, (10, 30))
-        self.screen.blit(nbFourmiTxt, (10, 45))
+
+        nbHerbivoreTxt = self.font.render('NbHerbivore : '+str(self.nbHerbivore), True,(255,255,255))
+        nbCarnivoreTxt = self.font.render('NbCarnivore : ' + str(self.nbCarnivore), True, (255,255,255))
+        nbFourmiTxt = self.font.render('NbFourmi : ' + str(self.nbFourmis), True, (255,255,255))
+        pg.draw.rect(self.app, pg.Color((255, 255, 204)), pg.Rect(5,5,180,80),2,border_radius=5)
+        self.app.blit(nbHerbivoreTxt,(10,15))
+        self.app.blit(nbCarnivoreTxt, (10, 30))
+        self.app.blit(nbFourmiTxt, (10, 45))
 
     def displayInstructions(self,isGrassEditMode):
         if isGrassEditMode:
@@ -117,10 +132,26 @@ class Display:
         if eventHandler.grassEditMode:
             self.displayGrassesEditZones(dish)
 
-    def display_obstacles(self, obstacles) :
+    def GetColonieColor(self, colonieId, fourmis) :
+        for foumi in fourmis :
+            if foumi.colonieId == colonieId :
+                return foumi.r , foumi.g ,foumi.b
+    
+    def display_obstacles(self, obstacles, fourmis) :
         for obstacle in obstacles :
             obstacle.update()
             if (obstacle is not None) :
-            
-                self.screen.blit(obstacle.get_image(), obstacle.get_shape())
+                shape = obstacle.get_shape()
+                if(obstacle.isAuntHill()) :
+                    
+                    position = shape.center
+                    color_r , color_g, color_b= self.GetColonieColor(obstacle.colonieId, fourmis)
+                    pg.draw.circle(self.screen, (color_r+50 , color_g+50, color_b+50), position,100)
+                
+                self.screen.blit(obstacle.get_image(), shape)
 
+                    
+            
+
+
+         

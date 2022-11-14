@@ -4,11 +4,10 @@ from src.Display import Display
 from src.Instance import Instance
 from src.EventHandler import EventHandler
 from src.species import FourmieCreator, HerbivorCreator, CarnivoreCreator
+from src.MotionService import MotionService
 
 pg.init()
 running = True
-SCREEN_SIZE_X = 1000
-SCREEN_SIZE_Y = 1000
 
 nbHerbivore = 0
 herbivoreInitRadius=20
@@ -37,7 +36,7 @@ fourmiSenseRadius=150
 fourmiNbRay = 10
 fourmiAngleOfVision = np.pi*2
 
-positionObstacle = (100, 100)
+positionObstacles = [(100, 100), (200,200)]
 
 
 grassRadius=5
@@ -49,13 +48,16 @@ fourmiPas=1
 
 bodyDecayingThreshold = -1000
 
-display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y)
-herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
-carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
-fourmieCreator = FourmieCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbFourmiPerColonie*nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,fourmiPas,  nbFourmiPerColonie,nbFourmiColonie, timeInEggForm, fourmiSenseRadius, fourmiNbRay, fourmiAngleOfVision)
+motionService = MotionService()
+display = Display(motionService, nbFourmiColonie)
+herbivorCreator = HerbivorCreator(nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
+carnivorCreator = CarnivoreCreator(nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
+fourmieCreator = FourmieCreator(nbFourmiPerColonie*nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,fourmiPas,  nbFourmiPerColonie,nbFourmiColonie, timeInEggForm, fourmiSenseRadius, fourmiNbRay, fourmiAngleOfVision)
 
-instance = Instance(SCREEN_SIZE_X, SCREEN_SIZE_Y,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, herbivorCreator, carnivorCreator, fourmieCreator, positionObstacle)
-eventHandler = EventHandler(grassZoneEditRadius)
+instance = Instance(nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, herbivorCreator, carnivorCreator, fourmieCreator, positionObstacles)
+
+eventHandler = EventHandler(grassZoneEditRadius, motionService)
+
 
 while running:
     instance.updateDish()
@@ -64,6 +66,8 @@ while running:
     display.displayAll(instance.herbivores,instance.carnivores,instance.fourmis,instance.dish, eventHandler)
     for e in pg.event.get():
         running = eventHandler.handleEvent(e,instance)
+
+    pg.display.update()
 
 
 pg.quit()
