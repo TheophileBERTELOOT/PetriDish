@@ -4,7 +4,9 @@ from gym_ants.species import FourmiType
 from gym_ants.environment.Obstacle import Obstacle
 import random
 import numpy as np
+
 from copy import deepcopy
+
 
 
 class Instance(object):
@@ -40,15 +42,6 @@ class Instance(object):
         self.oldDistance = []
         self.oldType = []
 
-        #self.agents = {}
-        #self.initAgents()
-
-
-
-
-    """def initAgents(self):
-        if len(self.fourmis)>0:
-            self.agents['fourmis'] = Qlearning(3,self.fourmis[0].fourmiNbRay,2)"""
 
     def herbivoresAct(self):
         newBorns=[]
@@ -109,11 +102,10 @@ class Instance(object):
             if fourmi.health > 0:
                 if (fourmi.type == FourmiType.OUVRIERE) :
                     food = self.dish.grasses + self.deadBodies
-                    #  self.agents['fourmis'].play(fourmi,food)
                     fourmi.eat(food)
-                    self.applyAction(actions[fourmiIndex])
-                    self.oldType = copy.deepcopy(fourmi.visionRayObject)
-                    self.oldDistance = copy.deepcopy(fourmi.visionRayLength)
+                    self.applyAction(fourmi, actions[fourmiIndex])
+                    self.oldType = deepcopy(fourmi.visionRayObject)
+                    self.oldDistance = deepcopy(fourmi.visionRayLength)
                     
 
                 fourmi.eatCarriedFood()
@@ -142,7 +134,7 @@ class Instance(object):
                     fourmiToRemove.append(fourmi)
 
             rewards.append(self._get_reward(fourmi))
-            next_states.append(self.stateFromRayType(fourmi))
+            next_states.append(self.stateFromRayType(fourmi.visionRayObject))
 
         for fourmi in fourmiToRemove:
             self.fourmis.remove(fourmi)

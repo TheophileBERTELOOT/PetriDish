@@ -12,11 +12,11 @@ import pygame as pg
 
 class AntsEnv(gym.Env):
 	def __init__(self):
-		self.action_space = spaces.Discrete(4)
-		self.observation_space = spaces.Box(low=0,
+		self.action_space = spaces.Discrete(3)
+		"""self.observation_space = spaces.Box(low=0,
 		high=4,
 		shape=(5, 4),
-		dtype=np.int16)
+		dtype=np.int16)"""
 		self.reward_range = (-200, 200)
 		self.current_episode = 0
 		self.success_episode = []
@@ -42,7 +42,7 @@ class AntsEnv(gym.Env):
 		# Get the current state: array of (nb_agents, state_dim)
 		self.current_state = []
 		for fourmi in self.instance.fourmis:
-			self.current_state.append(self.stateFromRayType(fourmi))
+			self.current_state.append(self.instance.stateFromRayType(fourmi.visionRayObject))
 		self.current_state = np.array(self.current_state)
 		return self.current_state
 
@@ -51,9 +51,9 @@ class AntsEnv(gym.Env):
 		next_states = []
 		rewards = []
 		done = False
-		instance.updateDish()
-		next_states, rewards =  instance.cellsAct()
-		instance.isGoingThroughWall()
+		self.instance.updateDish()
+		next_states, rewards =  self.instance.cellsAct(action)
+		self.instance.isGoingThroughWall()
 		return self.current_state, rewards, done, info
 		
 

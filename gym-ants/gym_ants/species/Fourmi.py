@@ -182,7 +182,7 @@ class Fourmi(Species):
     def dying(self):
         self.health -= 1
         self.age+=1
-        if age >= self.death_age:
+        if self.age >= self.death_age:
             self.die()
         self.radius = int(self.initialRadius * (self.health / self.initHealth))
         if self.radius > self.initialRadius:
