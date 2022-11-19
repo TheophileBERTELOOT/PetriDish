@@ -15,7 +15,7 @@ class FourmiType(Enum) :
 
 class Fourmi(Species):
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,
-                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId, avgLifeExpectancy = 100, seed=42):
+                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId, avgLifeExpectancy = 1000, seed=42):
         super().__init__(x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas)
 
         self.color = pg.Color((r,g,b))
@@ -49,8 +49,9 @@ class Fourmi(Species):
             self.visionRayLength.append(lengthRay)
             self.visionRayObject.append(None)
         self.visionRayCoordinate = np.array(self.visionRayCoordinate)
-        self.random = np.random.RandomState(seed)
+        self.random = np.random.RandomState()
         self.death_age = self.random.exponential(avgLifeExpectancy)
+        self.angle = calcAngle(self.dx,self.dy)
 
 
     def run(self):
@@ -228,8 +229,9 @@ class Fourmi(Species):
                             continue # Si les deux fourmis sont des oeufs, rien ne se passe
                     
                     # Le degré de la blessure va dépendre de la santé des deux fourmis 
-                    injury_degree = self.random.beta(creature.health, self.health)
-                    self.health = int(self.health * injury_prop)
+                    if creature.health > 0 and self.health > 0:
+                        injury_degree = self.random.beta(creature.health, self.health)
+                        self.health = int(self.health * injury_degree)
 
 
 

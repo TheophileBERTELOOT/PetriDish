@@ -21,7 +21,7 @@ class AntsEnv(gym.Env):
 		self.current_episode = 0
 		self.success_episode = []
 		self.fourmis = [] 
-		self.pg = pg.init()
+		pg.init()
 		self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y)
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
 		self.carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
@@ -59,11 +59,11 @@ class AntsEnv(gym.Env):
 
 
 	def render(self):
-		self.display(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
+		self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
 
 
 	def close(self):
-		self.pg.quit()
+		pg.quit()
 
 	
 
