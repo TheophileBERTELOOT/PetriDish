@@ -3,6 +3,7 @@ from gym import spaces
 import numpy as np
 from gym_ants.config.AntsEnvConfig import *
 from gym_ants.helpers.Display import Display
+from gym_ants.helpers.MotionService import MotionService
 from gym_ants.species.HerbivorCreator import HerbivorCreator
 from gym_ants.species.CarnivoreCreator import CarnivoreCreator
 from gym_ants.species.FourmieCreator import FourmieCreator
@@ -22,18 +23,19 @@ class AntsEnv(gym.Env):
 		self.success_episode = []
 		self.fourmis = [] 
 		pg.init()
-		self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y)
+		self.motionService = MotionService(SCREEN_SIZE_X,SCREEN_SIZE_Y)
+		self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
 		self.carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
 		self.fourmieCreator = FourmieCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbFourmiPerColonie*nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,fourmiPas,  nbFourmiPerColonie,nbFourmiColonie, timeInEggForm, fourmiSenseRadius, fourmiNbRay, fourmiAngleOfVision)
 		self.instance = Instance(SCREEN_SIZE_X, SCREEN_SIZE_Y,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, self.herbivorCreator, self.carnivorCreator, self.fourmieCreator, positionObstacle)
-		self.eventHandler = EventHandler(grassZoneEditRadius)
+		self.eventHandler = EventHandler(grassZoneEditRadius, self.motionService)
 
 
 
 
 	def reset(self):
-		self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y)
+		self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
 		self.carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
 		self.fourmieCreator = FourmieCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbFourmiPerColonie*nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,fourmiPas,  nbFourmiPerColonie,nbFourmiColonie, timeInEggForm, fourmiSenseRadius, fourmiNbRay, fourmiAngleOfVision)
@@ -60,6 +62,8 @@ class AntsEnv(gym.Env):
 
 	def render(self):
 		self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
+		for e in pg.event.get():
+			running = self.eventHandler.handleEvent(e,self.instance)
 
 
 	def close(self):

@@ -2,7 +2,7 @@ import pygame as pg
 import numpy as np
 
 class Display:
-    def __init__(self,SCREEN_SIZE_X,SCREEN_SIZE_Y):
+    def __init__(self,SCREEN_SIZE_X,SCREEN_SIZE_Y,  motionService):
         self.screenSizeX = SCREEN_SIZE_X
         self.screenSizeY = SCREEN_SIZE_Y
         self.nbHerbivore = 0
@@ -12,6 +12,7 @@ class Display:
         self.TYPE_OUVRIERE=1
         self.screen = pg.display.set_mode((SCREEN_SIZE_X, SCREEN_SIZE_Y))
         self.font = pg.font.Font('freesansbold.ttf', 16)
+        self.motionService = motionService
 
     def displayAll(self,herbivores,carnivores,fourmis,dish, eventHandler):
         self.screen.fill((255, 255, 255))
@@ -21,12 +22,13 @@ class Display:
         self.display_obstacles(dish.obstacles)
         self.displayDish(dish,eventHandler)
         self.displayInformation()
-        self.displaySelectedCellInfo(eventHandler.selectedCell)
+        self.displaySelectedCellInfo()
         self.displayInstructions(eventHandler.grassEditMode)
         pg.display.flip()
 
-    def displaySelectedCellInfo(self,cell):
-        if cell != None:
+    def displaySelectedCellInfo(self):
+        cell = self.motionService.itemSelected
+        if cell != None and self.motionService.IsFourmiSelected():
             width = 150
             height = 100
             offset = 20 + cell.radius
@@ -121,6 +123,12 @@ class Display:
         for obstacle in obstacles :
             obstacle.update()
             if (obstacle is not None) :
-            
-                self.screen.blit(obstacle.get_image(), obstacle.get_shape())
+                shape = obstacle.get_shape()
+                if(obstacle.isAuntHill()) :
+                    
+                    position = shape.center
+                    color_r , color_g, color_b= self.GetColonieColor(obstacle.colonieId, fourmis)
+                    pg.draw.circle(self.screen, (color_r+50 , color_g+50, color_b+50), position,100)
+                
+                self.screen.blit(obstacle.get_image(), shape)
 
