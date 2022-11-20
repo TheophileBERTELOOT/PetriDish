@@ -15,7 +15,7 @@ class FourmiType(Enum) :
 
 class Fourmi(Species):
     def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas,timeInEggForm,
-                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId, avgLifeExpectancy = 1000, seed=42):
+                 fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId, avgLifeExpectancy = 3000, seed=42):
         super().__init__(x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas)
 
         self.color = pg.Color((r,g,b))
