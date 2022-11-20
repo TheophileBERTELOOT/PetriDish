@@ -2,8 +2,9 @@ import pygame as pg
 import random
 from gym_ants.environment.Grass import Grass
 from gym_ants.environment.Obstacle import Obstacle
+from gym_ants.environment.AntHill import AntHill
 class Dish:
-    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle):
+    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle, antQueens):
         self.maxX=maxX
         self.maxY=maxY
         self.grassRadius=grassRadius
@@ -12,8 +13,10 @@ class Dish:
         self.shouldGrowCoordinate=[]
         self.grassZoneEditRadius = grassZoneEditRadius
         self.obstacles = []
+        self.antHills = []
         self.initGrasses()
         self.init_obstacles(positionObstacle)
+        self.init_antHills(antQueens)
 
     def addGrassesGrowCoordinates(self,co):
         self.shouldGrowCoordinate.append(co)
@@ -38,6 +41,10 @@ class Dish:
     def init_obstacles(self, positionObstacle) :
         x, y = positionObstacle
         self.obstacles.append(Obstacle(x,y, 40,40))
+
+    def init_antHills(self, antQueens) :
+        for queen in antQueens : 
+            self.antHills.append(AntHill(queen.coordinate[0], queen.coordinate[1], queen.colonieId, queen.color))
 
     def regrowEatenGrasses(self):
         for grass in self.grasses:

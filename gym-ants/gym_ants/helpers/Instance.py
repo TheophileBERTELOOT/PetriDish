@@ -14,7 +14,6 @@ class Instance(object):
     def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, herbivorCreator, carnivorCreator, fourmieCreator, positionObstacle):
         
         
-        self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle)
         self.maxX=maxX
         self.maxY=maxY
 
@@ -41,6 +40,16 @@ class Instance(object):
         self.old_action = 0
         self.oldDistance = []
         self.oldType = []
+        queen_ants = self.getQueenAnt()
+        self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle, queen_ants)
+
+
+    def getQueenAnt(self):
+        queens = []
+        for ant in self.fourmis :
+            if (ant.type == FourmiType.REINE) :
+                queens.append(ant)
+        return queens
 
 
     def herbivoresAct(self):

@@ -18,8 +18,10 @@ class Display:
         self.screen.fill((255, 255, 255))
         self.displayHerbivores(herbivores)
         self.displayCarnivores(carnivores)
+        self.display_antHill(dish.antHills)
         self.displayFourmis(fourmis,eventHandler)
         self.display_obstacles(dish.obstacles)
+        
         self.displayDish(dish,eventHandler)
         self.displayInformation()
         self.displaySelectedCellInfo()
@@ -124,11 +126,9 @@ class Display:
             obstacle.update()
             if (obstacle is not None) :
                 shape = obstacle.get_shape()
-                if(obstacle.isAuntHill()) :
-                    
-                    position = shape.center
-                    color_r , color_g, color_b= self.GetColonieColor(obstacle.colonieId, fourmis)
-                    pg.draw.circle(self.screen, (color_r+50 , color_g+50, color_b+50), position,100)
-                
+               
                 self.screen.blit(obstacle.get_image(), shape)
 
+    def display_antHill(self, antHills) :
+        for antHill in antHills :
+            pg.draw.circle(self.screen, antHill.color, antHill.center, antHill.radius)
