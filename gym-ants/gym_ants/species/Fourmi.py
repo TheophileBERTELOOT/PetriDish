@@ -91,6 +91,7 @@ class Fourmi(Species):
                     self.hasEaten = True
                     self.health += self.bonusHealth
                     self.nbAte += 1
+                    self.death_age+=self.bonusHealth
                     self.hungriness = 0
                 elif r>self.probEatCarriedFood and r<50*self.probEatCarriedFood:
                     self.foodCarried.isCarried = False
@@ -165,6 +166,7 @@ class Fourmi(Species):
                         food.eaten()
                         self.hasEaten = True
                         self.health += self.bonusHealth
+                        self.death_age+=self.bonusHealth
                         self.nbAte += 1
                         self.hungriness = 0
         if not self.hasEaten:

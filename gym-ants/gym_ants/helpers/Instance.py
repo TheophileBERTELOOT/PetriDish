@@ -151,16 +151,27 @@ class Instance(object):
         return np.array(next_states), np.array(rewards)
 
         
+    def closestFood(self):
+        minDist = np.inf
+        for indexRay in range(len(self.oldDistance)):
+            oldRayType = self.oldType[indexRay]
+            if oldRayType == 1:
+                if self.oldDistance[indexRay] <minDist:
+                    minDist=self.oldDistance[indexRay]
+        return minDist
+
 
     def calcDistanceReward(self,cell):
+        if self.oldDistance:
+            closestFood = self.closestFood()
         for indexRay in range(len(self.oldDistance)):
             newType = cell.visionRayObject[indexRay]
             oldRayType = self.oldType[indexRay]
             if newType == 1:
                 newDistance = cell.visionRayLength[indexRay]
-                oldRayDistance = self.oldDistance[indexRay]
-                if newDistance<oldRayDistance:
-                    return 50
+                if newDistance<closestFood:
+                    return 10
+        return -5
 
     def _get_reward(self, cell):
         if cell.hasEaten:

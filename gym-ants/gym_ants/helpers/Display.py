@@ -1,6 +1,6 @@
 import pygame as pg
 import numpy as np
-
+import os
 class Display:
     def __init__(self,SCREEN_SIZE_X,SCREEN_SIZE_Y,  motionService):
         self.screenSizeX = SCREEN_SIZE_X
@@ -32,7 +32,7 @@ class Display:
         cell = self.motionService.itemSelected
         if cell != None and self.motionService.IsFourmiSelected():
             width = 150
-            height = 100
+            height = 200
             offset = 20 + cell.radius
             leftCornerX = cell.coordinate[0]-width/2
             leftCornerY =  cell.coordinate[1]-height - offset
@@ -48,6 +48,11 @@ class Display:
                                                                  (rightCornerTriangleX,rightCornerTriangleY),
                                                                  (bottomCornerTriangleX,bottomCornerTriangleY)])
             health = self.font.render('Health : '+str(cell.health), True, (0, 0, 0))
+            for rayIndex in range(len(cell.visionRayObject)):
+                rayObject = cell.visionRayObject[rayIndex]
+                rayDistance = cell.visionRayLength[rayIndex]
+                raySurf = self.font.render(str(round(rayDistance,2))+' : '+str(rayObject), True, (0, 0, 0))
+                self.screen.blit(raySurf, (leftCornerX + 5, 30 + leftCornerY +  15 * (rayIndex )))
             self.screen.blit(health,(leftCornerX+5,leftCornerY+5))
 
 
