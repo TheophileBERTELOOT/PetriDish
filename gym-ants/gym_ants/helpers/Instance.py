@@ -142,7 +142,7 @@ class Instance(object):
                     fourmi.b = 0
                     fourmi.color = pg.Color((255,0,0))
                     self.deadBodies.append(fourmi)
-                if fourmi.health < self.bodyDecayingThreshold:
+                if fourmi.health < self.bodyDecayingThreshold or fourmi.isEaten:
                     fourmiToRemove.append(fourmi)
 
             rewards.append(self._get_reward(fourmi))
