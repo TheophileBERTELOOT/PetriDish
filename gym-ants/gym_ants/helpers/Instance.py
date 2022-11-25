@@ -4,6 +4,7 @@ from gym_ants.species import FourmiType
 from gym_ants.environment.Obstacle import Obstacle
 import random
 import numpy as np
+import pygame as pg
 
 from copy import deepcopy
 
@@ -29,7 +30,7 @@ class Instance(object):
         self.herbivores = self.herbivorCreator.initSpecies()
         self.carnivores = self.carnivorCreator.initSpecies()
         self.fourmis = self.fourmieCreator.initSpecies()
-        
+
         self.obstacles = []
 
         self.deadBodies = []
@@ -39,6 +40,7 @@ class Instance(object):
         self.old_value = 0
         self.old_action = 0
         self.oldDistance = []
+        self.oldClosestFood = None
         self.oldType = []
         queen_ants = self.getQueenAnt()
         self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle, queen_ants)
@@ -134,11 +136,12 @@ class Instance(object):
                     self.fourmis += newBorns
             else:
                 if fourmi not in self.deadBodies:
-                    self.deadBodies.append(fourmi)
                     fourmi.radius = self.grassRadius
                     fourmi.r = 255
                     fourmi.g = 0
                     fourmi.b = 0
+                    fourmi.color = pg.Color((255,0,0))
+                    self.deadBodies.append(fourmi)
                 if fourmi.health < self.bodyDecayingThreshold:
                     fourmiToRemove.append(fourmi)
 
@@ -151,26 +154,20 @@ class Instance(object):
         return np.array(next_states), np.array(rewards)
 
         
-    def closestFood(self):
+    def closestFood(self,cell):
         minDist = np.inf
-        for indexRay in range(len(self.oldDistance)):
-            oldRayType = self.oldType[indexRay]
-            if oldRayType == 1:
-                if self.oldDistance[indexRay] <minDist:
-                    minDist=self.oldDistance[indexRay]
+        if len(cell.objectInVisionDistance)>0:
+            minDist = min(cell.objectInVisionDistance)
         return minDist
 
 
     def calcDistanceReward(self,cell):
-        if self.oldDistance:
-            closestFood = self.closestFood()
-        for indexRay in range(len(self.oldDistance)):
-            newType = cell.visionRayObject[indexRay]
-            oldRayType = self.oldType[indexRay]
-            if newType == 1:
-                newDistance = cell.visionRayLength[indexRay]
-                if newDistance<closestFood:
-                    return 10
+        closestFood = self.closestFood(cell)
+        if self.oldClosestFood:
+            if closestFood<self.oldClosestFood:
+                self.oldClosestFood = closestFood
+                return 10
+        self.oldClosestFood = closestFood
         return -5
 
     def _get_reward(self, cell):
@@ -181,6 +178,7 @@ class Instance(object):
 
 
     def applyAction(self, cell, selectedAction):
+
         angle = cell.angle
 
         if selectedAction == 0:

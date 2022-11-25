@@ -48,11 +48,10 @@ class Display:
                                                                  (rightCornerTriangleX,rightCornerTriangleY),
                                                                  (bottomCornerTriangleX,bottomCornerTriangleY)])
             health = self.font.render('Health : '+str(cell.health), True, (0, 0, 0))
-            for rayIndex in range(len(cell.visionRayObject)):
-                rayObject = cell.visionRayObject[rayIndex]
-                rayDistance = cell.visionRayLength[rayIndex]
-                raySurf = self.font.render(str(round(rayDistance,2))+' : '+str(rayObject), True, (0, 0, 0))
-                self.screen.blit(raySurf, (leftCornerX + 5, 30 + leftCornerY +  15 * (rayIndex )))
+            for distanceIndex in range(len(cell.objectInVisionDistance)):
+                rayDistance = cell.objectInVisionDistance[distanceIndex]
+                raySurf = self.font.render(str(round(rayDistance,2)), True, (0, 0, 0))
+                self.screen.blit(raySurf, (leftCornerX + 5, 30 + leftCornerY +  15 * (distanceIndex )))
             self.screen.blit(health,(leftCornerX+5,leftCornerY+5))
 
 
@@ -82,6 +81,9 @@ class Display:
         self.nbFourmis=0
         for fourmi in fourmis:
             if fourmi.health>0:
+                if eventHandler.seeVisionRay:
+                    pg.draw.circle(self.screen, pg.Color(fourmi.r,fourmi.g,fourmi.b), fourmi.coordinate,
+                                   fourmi.fourmiSenseRadius,width=1)
                 if fourmi.type == self.TYPE_REINE:
                     pg.draw.circle(self.screen, pg.Color((255, 255, 0)), fourmi.coordinate,
                                    fourmi.radius+3)
@@ -94,9 +96,10 @@ class Display:
                     foodCarriedCoordinate = fourmi.coordinate + np.array([((fourmi.radius+2)*fourmi.dx),((fourmi.radius+2)*fourmi.dy)])
                     pg.draw.circle(self.screen,fourmi.foodCarried.color, foodCarriedCoordinate,fourmi.foodCarried.radius)
 
-                if eventHandler.seeVisionRay:
-                    for indexRay in range(fourmi.fourmiNbRay):
-                        pg.draw.line(self.screen,pg.Color((fourmi.r,fourmi.g,fourmi.b)),fourmi.coordinate,fourmi.visionRayCoordinate[indexRay])
+
+                # if eventHandler.seeVisionRay:
+                #     for indexRay in range(fourmi.fourmiNbRay):
+                #         pg.draw.line(self.screen,pg.Color((fourmi.r,fourmi.g,fourmi.b)),fourmi.coordinate,fourmi.visionRayCoordinate[indexRay])
                 self.nbFourmis += 1
             else:
                 pg.draw.circle(self.screen, pg.Color((fourmi.r,fourmi.g,fourmi.b)), fourmi.coordinate, fourmi.radius)

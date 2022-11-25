@@ -8,7 +8,7 @@ def aColideWithB(x1,y1,radius,x2,y2):
 def lineColideWithCircle(L,E,C,r):
     d = L - E
     f = E - C
-    r = r*2
+    r = r
     a = d.dot(d)
     b = 2 * f.dot(d)
     c = f.dot(f) - r ** 2

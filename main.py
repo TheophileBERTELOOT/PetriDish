@@ -3,7 +3,7 @@ import numpy as np
 
 
 if __name__ == '__main__':
-    n_steps = 2000
+    n_steps = 10000
     n_episodes = 100 
     env = gym.make("gym_ants:ants-v0")
     state = env.reset()

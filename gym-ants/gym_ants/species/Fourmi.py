@@ -39,6 +39,8 @@ class Fourmi(Species):
         self.visionRayCoordinate = []
         self.visionRayLength = []
         self.visionRayObject = []
+        self.objectInVisionRange = []
+        self.objectInVisionDistance =[]
         anglePerRay = 2*np.pi/self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
 
@@ -121,32 +123,41 @@ class Fourmi(Species):
     def smell(self,fourmis,grasses):
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
-        for indexRay in range(self.fourmiNbRay):
-            L = self.visionRayCoordinate[indexRay]
-            E = self.coordinate
-            isColidingOnce = False
-            for fourmi in fourmis:
-                if fourmi != self:
-                    C = fourmi.coordinate
-                    if calcDistanceBetweenTwoPoint(C,E) < lengthRay:
-                        r = fourmi.radius
-                        isColiding = lineColideWithCircle(L,E,C,r)
-                        if isColiding :
-                            self.updateVisionRay(indexRay,L,E,C,r,0)
-                            isColidingOnce = True
-                            break
-            if not isColidingOnce:
-                for grass in grasses:
-                    C = grass.coordinate
-                    if calcDistanceBetweenTwoPoint(C, E) < lengthRay:
-                        r = grass.radius
-                        isColiding = lineColideWithCircle(L, E, C, r)
-                        if isColiding:
-                            self.updateVisionRay(indexRay,L,E,C,r,1)
-                            isColidingOnce = True
-                            break
-            if not isColidingOnce:
-                self.resetVisionRay(indexRay)
+        E = self.coordinate
+        self.objectInVisionRange = []
+        self.objectInVisionDistance = []
+        for grass in grasses:
+            C = grass.coordinate
+            distance = calcDistanceBetweenTwoPoint(C, E)
+            if distance < lengthRay:
+                self.objectInVisionRange.append(grass)
+                self.objectInVisionDistance.append(distance)
+        # for indexRay in range(self.fourmiNbRay):
+        #     L = self.visionRayCoordinate[indexRay]
+        #     E = self.coordinate
+        #     isColidingOnce = False
+            # for fourmi in fourmis:
+            #     if fourmi != self:
+            #         C = fourmi.coordinate
+            #         if calcDistanceBetweenTwoPoint(C,E) < lengthRay:
+            #             r = fourmi.radius
+            #             isColiding = lineColideWithCircle(L,E,C,r)
+            #             if isColiding :
+            #                 self.updateVisionRay(indexRay,L,E,C,r,0)
+            #                 isColidingOnce = True
+            #                 break
+            # if not isColidingOnce:
+            #     for grass in grasses:
+            #         C = grass.coordinate
+            #         if calcDistanceBetweenTwoPoint(C, E) < lengthRay:
+            #             r = grass.radius
+            #             isColiding = lineColideWithCircle(L, E, C, r)
+            #             if isColiding:
+            #                 self.updateVisionRay(indexRay,L,E,C,r,1)
+            #                 isColidingOnce = True
+            #                 break
+
+
 
 
 
