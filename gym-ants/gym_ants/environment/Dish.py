@@ -4,7 +4,7 @@ from gym_ants.environment.Grass import Grass
 from gym_ants.environment.Obstacle import Obstacle
 from gym_ants.environment.AntHill import AntHill
 class Dish:
-    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle, antQueens):
+    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionsObstacle, antQueens):
         self.maxX=maxX
         self.maxY=maxY
         self.grassRadius=grassRadius
@@ -15,7 +15,7 @@ class Dish:
         self.obstacles = []
         self.antHills = []
         self.initGrasses()
-        self.add_obstacle(positionObstacle)
+        self.add_obstacles(positionsObstacle)
         self.init_antHills(antQueens)
 
     def addGrassesGrowCoordinates(self,co):
@@ -43,6 +43,10 @@ class Dish:
             radius= self.grassRadius
             grass = Grass(x,y,radius,self.maxX,self.maxY)
             self.grasses.append(grass)
+
+    def add_obstacles(self, positionsObstacle) :
+        for position in positionsObstacle :
+            self.add_obstacle(position)
 
     def add_obstacle(self, positionObstacle) :
         x, y = positionObstacle
