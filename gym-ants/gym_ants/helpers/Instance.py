@@ -113,13 +113,13 @@ class Instance(object):
             if fourmi.health > 0:
                 if (fourmi.type == FourmiType.OUVRIERE) :
                     food = self.dish.grasses + self.deadBodies
-                    fourmi.eat(food)
-                    self.applyAction(fourmi, actions[fourmiIndex])
+                    # fourmi.eat(food)
+                    self.applyAction(fourmi, actions[fourmiIndex], food)
                     self.oldType = deepcopy(fourmi.visionRayObject)
                     self.oldDistance = deepcopy(fourmi.visionRayLength)
                     
 
-                fourmi.eatCarriedFood()
+                # fourmi.eatCarriedFood()
                 if (self.dish.isGoingThroughObstacles(fourmi)) :
                     fourmi.deviate_obstacles()
                 else :
@@ -147,7 +147,6 @@ class Instance(object):
 
             rewards.append(self._get_reward(fourmi))
             next_states.append(self.getState(fourmi))
-
         for fourmi in fourmiToRemove:
             self.fourmis.remove(fourmi)
             self.deadBodies.remove(fourmi)
@@ -155,20 +154,21 @@ class Instance(object):
 
         
     def closestFood(self,cell):
-        minDist = np.inf
+        minDist = np.sqrt(self.maxX**2 + self.maxY**2)
         if len(cell.objectInVisionDistance)>0:
             minDist = min(cell.objectInVisionDistance)
 
-        return minDist ###########
+
+        return  minDist
 
     def closestEnemy(self, cell):
-        minDist = np.inf
+        minDist = np.sqrt(self.maxX**2 + self.maxY**2)
         if len(cell.enemyInVisionDistance)>0:
             minDist = min(cell.enemyInVisionDistance)
         return minDist
 
     def closestObstacle(self, cell):
-        minDist = np.inf
+        minDist = np.sqrt(self.maxX**2 + self.maxY**2)
         if len(cell.obstacleInVisionDistance)>0:
             minDist = min(cell.obstacleInVisionDistance)
         return minDist
@@ -191,21 +191,30 @@ class Instance(object):
             return self.calcDistanceReward(cell)
 
 
-    def applyAction(self, cell, selectedAction):
+    def applyAction(self, cell, selectedAction, food):
 
         angle = cell.angle
 
-        if selectedAction == 0:
+
+        if selectedAction[0] == 0:
             angle+=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
-        elif selectedAction == 1:
+        elif selectedAction[0] == 1:
             angle-=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
         else:
             angle = angle
         cell.normalize()
+
+        if selectedAction[1] == 0:
+            cell.eatCarriedFood()
+        elif selectedAction[1] == 1:
+            cell.carryFood(food)
+        else:
+            cell.dropCarriedFood()
+            
 
     def cellsAct(self, actions):
         self.herbivoresAct()

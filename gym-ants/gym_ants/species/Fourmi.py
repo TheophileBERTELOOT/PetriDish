@@ -96,10 +96,16 @@ class Fourmi(Species):
                     self.death_age+=self.bonusHealth
                     self.hungriness = 0
                 elif r>self.probEatCarriedFood and r<50*self.probEatCarriedFood:
-                    self.foodCarried.isCarried = False
-                    self.foodCarried.x = self.coordinate[0]+self.radius*1.5*self.dx
-                    self.foodCarried.y = self.coordinate[1]+self.radius*1.5*self.dy
-                    self.foodCarried = None
+                    self.dropCarriedFood()
+
+
+    def dropCarriedFood(self):
+        if self.foodCarried != None:
+            self.foodCarried.isCarried = False
+            self.foodCarried.x = self.coordinate[0]+self.radius*1.5*self.dx
+            self.foodCarried.y = self.coordinate[1]+self.radius*1.5*self.dy
+            self.foodCarried = None
+
 
     def updateVisionRay(self,indexRay,L,E,C,r,type):
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
@@ -195,6 +201,7 @@ class Fourmi(Species):
                 if r <0.5 and self.foodCarried==None and self.type != FourmiType.REINE and not self.isEgg:
                     self.foodCarried = food
                     food.carried(self.coordinate[0],self.coordinate[1])
+
                 else:
                     if (self.foodCarried !=None and self.foodCarried != food) or self.foodCarried == None:
                         food.eaten()
@@ -206,10 +213,15 @@ class Fourmi(Species):
         if not self.hasEaten:
             self.hungriness += 1
 
-    """def act(self, grasses,deadBodies):
-        food = grasses + deadBodies
-        if (self.type == FourmiType.OUVRIERE) :
-            self.agent.play(self, food)"""
+    def carryFood(self, foods):
+        for food in foods:
+            if self.foodCarried!=None:
+                break
+            if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
+                            food.coordinate[1]) :
+                self.foodCarried = food
+                food.carried(self.coordinate[0],self.coordinate[1])
+
 
     def isHatched(self):
         if self.age >= 0 and self.nbAte>=self.reproductionThreshold and self.isEgg:
