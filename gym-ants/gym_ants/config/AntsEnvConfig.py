@@ -30,7 +30,7 @@ fourmiSenseRadius=150
 fourmiNbRay = 10
 fourmiAngleOfVision = np.pi*2
 
-positionObstacle = (100, 100)
+positionObstacle = [(100, 100), (200,200)]
 
 
 grassRadius=10

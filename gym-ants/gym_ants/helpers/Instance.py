@@ -12,7 +12,7 @@ from copy import deepcopy
 
 class Instance(object):
 
-    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, herbivorCreator, carnivorCreator, fourmieCreator, positionObstacle):
+    def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, herbivorCreator, carnivorCreator, fourmieCreator, positionsObstacle):
         
         
         self.maxX=maxX
@@ -43,7 +43,7 @@ class Instance(object):
         self.oldClosestFood = None
         self.oldType = []
         queen_ants = self.getQueenAnt()
-        self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle, queen_ants)
+        self.dish = Dish(maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionsObstacle, queen_ants)
 
 
     def getQueenAnt(self):
