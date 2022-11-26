@@ -13,6 +13,8 @@ class Display:
         self.screen = pg.display.set_mode((SCREEN_SIZE_X, SCREEN_SIZE_Y))
         self.font = pg.font.Font('freesansbold.ttf', 16)
         self.motionService = motionService
+        self.ant_image = pg.image.load('ant_.png').convert_alpha()
+        self.leaf_image = pg.image.load("leaf.png").convert_alpha()
 
     def displayAll(self,herbivores,carnivores,fourmis,dish, eventHandler):
         self.screen.fill((255, 255, 255))
@@ -94,6 +96,9 @@ class Display:
                     foodCarriedCoordinate = fourmi.coordinate + np.array([((fourmi.radius+2)*fourmi.dx),((fourmi.radius+2)*fourmi.dy)])
                     pg.draw.circle(self.screen,fourmi.foodCarried.color, foodCarriedCoordinate,fourmi.foodCarried.radius)
 
+                w, h = self.ant_image.get_size()
+                self.screen.blit(self.ant_image, (fourmi.coordinate[0]-w/2, fourmi.coordinate[1]-h/2))   
+
                 if eventHandler.seeVisionRay:
                     for indexRay in range(fourmi.fourmiNbRay):
                         pg.draw.line(self.screen,pg.Color((fourmi.r,fourmi.g,fourmi.b)),fourmi.coordinate,fourmi.visionRayCoordinate[indexRay])
@@ -115,6 +120,8 @@ class Display:
         for grass in grasses:
             if not grass.isCarried:
                 pg.draw.circle(self.screen, grass.color, grass.coordinate, grass.radius)
+                w, h = self.ant_image.get_size()
+                self.screen.blit(self.leaf_image, (grass.coordinate[0]-w/2, grass.coordinate[1]-h/2))   
 
     def displayGrassesEditZones(self,dish):
         for zone in dish.shouldGrowCoordinate:

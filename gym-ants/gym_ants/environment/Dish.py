@@ -3,6 +3,7 @@ import random
 from gym_ants.environment.Grass import Grass
 from gym_ants.environment.Obstacle import Obstacle
 from gym_ants.environment.AntHill import AntHill
+
 class Dish:
     def __init__(self,maxX,maxY,nbGrass,grassRadius,grassZoneEditRadius, positionObstacle, antQueens):
         self.maxX=maxX
@@ -44,7 +45,7 @@ class Dish:
 
     def init_antHills(self, antQueens) :
         for queen in antQueens : 
-            self.antHills.append(AntHill(queen.coordinate[0], queen.coordinate[1], queen.colonieId, queen.color))
+            self.antHills.append(AntHill(queen))
 
     def regrowEatenGrasses(self):
         for grass in self.grasses:
@@ -74,3 +75,9 @@ class Dish:
             isCollide = obstacle.shape.collidepoint(cell.coordinate[0], cell.coordinate[1])
             if isCollide : return True
         return False
+
+    def feedInAntHill(self, fourmi, foods) :
+        for hill in self.antHills :
+            if (fourmi == hill.queen) :
+                fourmi.queenEat(hill.radius,foods)
+

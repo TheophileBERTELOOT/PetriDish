@@ -3,6 +3,7 @@ import pygame as pg
 from enum import Enum
 
 from gym_ants.species.Species import Species
+from gym_ants.species.State import StateMachine, FourmiExploring, FourmiFeeding, FourmiFinding, FourmiStateName
 from src.Agent import EGreedy
 from gym_ants.helpers.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint,calcAngle
 from src.Qlearning import Qlearning
@@ -53,6 +54,24 @@ class Fourmi(Species):
         self.death_age = self.random.exponential(avgLifeExpectancy)
         self.angle = calcAngle(self.dx,self.dy)
 
+        self.initStateMAchine()
+        
+    def initStateMAchine(self) :
+        self.stateMachine = StateMachine()
+        exploring_state = FourmiExploring(self)
+        feeding_state = FourmiFeeding(self)
+        finding_state = FourmiFinding(self)
+        
+        self.stateMachine.add_state(exploring_state)
+        self.stateMachine.add_state(feeding_state)
+        self.stateMachine.add_state(finding_state)
+
+        self.stateMachine.set_state(FourmiStateName.EXPLORING)
+
+
+    def process(self, grasses) : 
+        self.stateMachine.transit(grasses)
+
 
     def run(self):
         if self.type!=FourmiType.REINE and not self.isEgg:
@@ -78,6 +97,12 @@ class Fourmi(Species):
         self.dy /= longueur
         self.angle = calcAngle(self.dx,self.dy)
 
+    def dropCarriedFood(self) :
+        if self.foodCarried != None:
+            self.foodCarried.isCarried = False
+            self.foodCarried.x = self.coordinate[0]+self.radius*1.5*self.dx
+            self.foodCarried.y = self.coordinate[1]+self.radius*1.5*self.dy
+            self.foodCarried = None
 
     def eatCarriedFood(self):
         if self.foodCarried != None:
@@ -94,10 +119,8 @@ class Fourmi(Species):
                     self.death_age+=self.bonusHealth
                     self.hungriness = 0
                 elif r>self.probEatCarriedFood and r<50*self.probEatCarriedFood:
-                    self.foodCarried.isCarried = False
-                    self.foodCarried.x = self.coordinate[0]+self.radius*1.5*self.dx
-                    self.foodCarried.y = self.coordinate[1]+self.radius*1.5*self.dy
-                    self.foodCarried = None
+                    self.dropCarriedFood()
+                    
 
     def updateVisionRay(self,indexRay,L,E,C,r,type):
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
@@ -118,6 +141,16 @@ class Fourmi(Species):
         self.visionRayObject[indexRay] = None
         self.visionRayLength[indexRay] = lengthRay
 
+    def isSmellingGrasses(self, grasses) :
+        lengthRay = self.fourmiSenseRadius + self.radius
+        for grass in grasses:
+            C = grass.coordinate
+            E = self.coordinate
+            if calcDistanceBetweenTwoPoint(C, E) < lengthRay:
+                r = grass.radius
+                return True
+        return False
+    
     def smell(self,fourmis,grasses):
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
@@ -148,11 +181,27 @@ class Fourmi(Species):
             if not isColidingOnce:
                 self.resetVisionRay(indexRay)
 
-
-
+    def queenEat(self, radius,foods) :
+        if (self.type != FourmiType.REINE) : 
+            return
+        self.hasEaten = False
+        for food in foods:
+            C = food.coordinate
+            E = self.coordinate
+            if calcDistanceBetweenTwoPoint(C, E) < radius:
+                self.hasEaten = True
+                self.health += self.bonusHealth
+                self.death_age+=self.bonusHealth
+                self.nbAte += 1
+                self.hungriness = 0
+    
+        if not self.hasEaten:
+            self.hungriness += 1
 
 
     def eat(self, foods):
+        if (self.type == FourmiType.REINE) : 
+            return
         self.hasEaten = False
         for food in foods:
             if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
@@ -169,6 +218,8 @@ class Fourmi(Species):
                         self.death_age+=self.bonusHealth
                         self.nbAte += 1
                         self.hungriness = 0
+
+
         if not self.hasEaten:
             self.hungriness += 1
 

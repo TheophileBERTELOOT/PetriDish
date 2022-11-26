@@ -4,11 +4,12 @@ import pygame as pg
 
 class AntHill:
 
-    def __init__(self, left, top,colonieId, colonieColor) :
-        self.center = np.array([left,top],dtype=float)
+    def __init__(self, queen) :
+        self.queen = queen
+        self.center = np.array([queen.coordinate[0],queen.coordinate[1]],dtype=float)
         self.radius = 100
-        self.colonieId = colonieId
-        self.color = self.GetColor(colonieColor)
+        self.colonieId = queen.colonieId
+        self.color = self.GetColor(queen.color)
 
     def GetColor(self, colonieColor) :
         color_r = min(colonieColor.r+50 , 255)

@@ -108,7 +108,7 @@ class Instance(object):
 
         for fourmiIndex in range(len(self.fourmis)):
             fourmi = self.fourmis[fourmiIndex]
-            if fourmi.health > 0:
+            if fourmi.health > 0:                
                 if (fourmi.type == FourmiType.OUVRIERE) :
                     food = self.dish.grasses + self.deadBodies
                     fourmi.eat(food)
@@ -127,11 +127,14 @@ class Instance(object):
                 fourmi.isHatched()
                 fourmi.smell(self.fourmis,self.dish.grasses)
                 if fourmi.type == FourmiType.REINE:
+                    foods = self.dish.grasses + self.deadBodies
+                    self.dish.feedInAntHill(fourmi, foods)
                     if fourmi.shouldReproduce():
                         newBorn = self.fourmieCreator.create(parent=fourmi)
                         newBorn.isEgg = True
                         newBorns.append(newBorn)
                     self.fourmis += newBorns
+                
             else:
                 if fourmi not in self.deadBodies:
                     self.deadBodies.append(fourmi)
@@ -142,7 +145,7 @@ class Instance(object):
                 if fourmi.health < self.bodyDecayingThreshold:
                     fourmiToRemove.append(fourmi)
 
-            rewards.append(self._get_reward(fourmi))
+            rewards.append(fourmi.process(self.dish.grasses))
             next_states.append(self.stateFromRayType(fourmi.visionRayObject))
 
         for fourmi in fourmiToRemove:
