@@ -71,13 +71,13 @@ class Dish:
     def isGoingThroughWall(self,cells):
         for cell in cells:
             if cell.coordinate[0]<0:
-                cell.coordinate[0] = self.maxX
-            if cell.coordinate[0]>self.maxX:
                 cell.coordinate[0] = 0
+            if cell.coordinate[0]>self.maxX:
+                cell.coordinate[0] = self.maxX
             if cell.coordinate[1]<0:
-                cell.coordinate[1]=self.maxY
-            if cell.coordinate[1]>self.maxY:
                 cell.coordinate[1]=0
+            if cell.coordinate[1]>self.maxY:
+                cell.coordinate[1]=self.maxY
 
     def isGoingThroughObstacles(self,cell):
         for obstacle in self.obstacles :
