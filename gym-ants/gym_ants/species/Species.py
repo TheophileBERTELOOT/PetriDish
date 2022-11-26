@@ -47,9 +47,7 @@ class Species(ABC):
     def eat(self,herbivores):
         pass
 
-    @abstractmethod
-    def act(self,herbivores):
-        pass
+    
 
     @abstractmethod
     def dying(self):

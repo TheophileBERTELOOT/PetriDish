@@ -101,5 +101,5 @@ class FourmieCreator(SpeciesCreator):
             fourmi = Fourmi(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold,
                             pas,timeInEggForm,fourmiSenseRadius,fourmiNbRay,fourmiAngleOfVision,type,colonieId)
             fourmi.normalize()
-            fourmi.agent = deepcopy(parent.agent)
+            #fourmi.agent = deepcopy(parent.agent)
         return fourmi
