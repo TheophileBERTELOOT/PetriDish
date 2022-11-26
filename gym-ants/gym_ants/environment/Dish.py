@@ -15,7 +15,7 @@ class Dish:
         self.obstacles = []
         self.antHills = []
         self.initGrasses()
-        self.init_obstacles(positionObstacle)
+        self.add_obstacle(positionObstacle)
         self.init_antHills(antQueens)
 
     def addGrassesGrowCoordinates(self,co):
@@ -30,6 +30,12 @@ class Dish:
                 self.shouldGrowCoordinate.pop(i)
                 break
 
+    def addObstaclesCoordinates(self,co):
+        self.add_obstacle(co)
+
+    def removeObstaclesCoordinates(self, obstacle):
+        self.obstacles.remove(obstacle)
+
     def initGrasses(self):
         for _ in range(self.nbGrass):
             x = random.randint(0, self.maxX)
@@ -38,7 +44,7 @@ class Dish:
             grass = Grass(x,y,radius,self.maxX,self.maxY)
             self.grasses.append(grass)
 
-    def init_obstacles(self, positionObstacle) :
+    def add_obstacle(self, positionObstacle) :
         x, y = positionObstacle
         self.obstacles.append(Obstacle(x,y, 40,40))
 

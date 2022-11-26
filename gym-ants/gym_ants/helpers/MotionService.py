@@ -13,26 +13,36 @@ class MotionService:
         self.screen_size_y = screen_size_y
     
     def SelectItem(self, position, instance) :
-        arrayPos = np.array(position)
-        noCellSelected = True
-        for obstacle in instance.dish.obstacles:
-            if obstacle.get_shape().collidepoint(arrayPos[0], arrayPos[1]):
-                self.itemSelected  = obstacle
-                noCellSelected = False
-                break
-        for fourmi in instance.fourmis:
-            if calcDistanceBetweenTwoPoint(fourmi.coordinate,arrayPos)<fourmi.radius:
-                self.itemSelected  = fourmi
-                noCellSelected = False
-                break
-        if (noCellSelected) :
-            self.itemSelected = None
+        self.itemSelected = self.GetItem(position, instance)
 
     def IsFourmiSelected(self):
         return isinstance(self.itemSelected, Fourmi)
 
+    def IsObstacleSelected(self):
+        return isinstance(self.itemSelected, Obstacle)
+    
+    def GetObstacleByPosition(self, position,instance) :
+        item = self.GetItem(position, instance)
+        if (isinstance(item, Obstacle)) :
+            return item
+
+        return item
+
+    def GetItem(self, position, instance) :
+        arrayPos = np.array(position)
+        for obstacle in instance.dish.obstacles:
+            if obstacle.get_shape().collidepoint(arrayPos[0], arrayPos[1]):
+                return obstacle
+
+        for fourmi in instance.fourmis:
+            if calcDistanceBetweenTwoPoint(fourmi.coordinate,arrayPos)<fourmi.radius:
+                return fourmi
+                
+        return None
+
+
     def MoveObstacle(self, moveUp, moveDown, moveLeft, moveRight ) :
-        if (isinstance(self.itemSelected, Obstacle)) :
+        if (self.IsObstacleSelected()) :
             shape = self.itemSelected.get_shape()
             if moveDown and shape.bottom < self.screen_size_y:
                 shape.top += MOVESPEED

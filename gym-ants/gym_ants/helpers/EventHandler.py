@@ -7,6 +7,7 @@ class EventHandler:
         self.grassZoneEditRadius = grassZoneEditRadius
         self.grassEditMode = False
         self.seeVisionRay =  False
+        self.obstacleEditMode = False
         self.motionService = motionService
         self.moveUp, self.moveDown, self.moveLeft, self.moveRight = False,False,False,False
 
@@ -17,11 +18,15 @@ class EventHandler:
             running = False
         if self.grassEditMode:
             self.handleGrassEditMode(event,instance)
+        if self.obstacleEditMode:
+            self.handleObstacleEditMode(event,instance)
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_g:
                 self.toggleGrassEditMode()
             if event.key == pg.K_v:
                 self.toggleSeeVisionRay()
+            if event.key == pg.K_o:
+                self.toggleObstacleEditMode()
         if event.type == pg.MOUSEBUTTONUP:
             pos = pg.mouse.get_pos()
             if event.button == 1:
@@ -66,8 +71,21 @@ class EventHandler:
             elif e.button == 3:
                 instance.dish.removeGrassesGrowCoordinates(pos)
 
+    def handleObstacleEditMode(self,e,instance):
+        if e.type == pg.MOUSEBUTTONUP:
+            pos = pg.mouse.get_pos()
+            if e.button == 1:
+                instance.dish.addObstaclesCoordinates(pos)
+            elif e.button == 3:
+                    obstacle = self.motionService.GetObstacleByPosition(pos,instance)
+                    if obstacle != None:
+                        instance.dish.removeObstaclesCoordinates(obstacle)
+
     def toggleGrassEditMode(self):
         self.grassEditMode = not self.grassEditMode
+    
+    def toggleObstacleEditMode(self):
+        self.obstacleEditMode = not self.obstacleEditMode
 
     def selectACell(self,instance,pos):
         self.motionService.SelectItem(pos, instance)
