@@ -111,9 +111,13 @@ class Instance(object):
         for fourmiIndex in range(len(self.fourmis)):
             fourmi = self.fourmis[fourmiIndex]
             if fourmi.health > 0:
+                food = self.dish.grasses + self.deadBodies
+                for antHill in self.dish.antHills:
+                    if antHill.colonieId == fourmi.colonieId:
+                        fourmiAntHill = antHill
+                fourmi.eat(food,fourmiAntHill,self.fourmis)
                 if (fourmi.type == FourmiType.OUVRIERE) :
-                    food = self.dish.grasses + self.deadBodies
-                    fourmi.eat(food)
+                    actions = np.random.randint(3, size=len(self.fourmis))
                     self.applyAction(fourmi, actions[fourmiIndex])
                     self.oldType = deepcopy(fourmi.visionRayObject)
                     self.oldDistance = deepcopy(fourmi.visionRayLength)
@@ -130,10 +134,10 @@ class Instance(object):
                 fourmi.smell(self.fourmis,self.dish.grasses)
                 if fourmi.type == FourmiType.REINE:
                     if fourmi.shouldReproduce():
-                        newBorn = self.fourmieCreator.create(parent=fourmi)
+                        newBorn = self.fourmieCreator.Create(parent=fourmi)
                         newBorn.isEgg = True
                         newBorns.append(newBorn)
-                    self.fourmis += newBorns
+
             else:
                 if fourmi not in self.deadBodies:
                     fourmi.radius = self.grassRadius
@@ -145,12 +149,16 @@ class Instance(object):
                 if fourmi.health < self.bodyDecayingThreshold or fourmi.isEaten:
                     fourmiToRemove.append(fourmi)
 
+
             rewards.append(self._get_reward(fourmi))
             next_states.append(self.stateFromRayType(fourmi.visionRayObject))
-
+        self.fourmis += newBorns
         for fourmi in fourmiToRemove:
-            self.fourmis.remove(fourmi)
-            self.deadBodies.remove(fourmi)
+            if fourmi in self.deadBodies:
+                self.deadBodies.remove(fourmi)
+            if fourmi in self.fourmis:
+                self.fourmis.remove(fourmi)
+
         return np.array(next_states), np.array(rewards)
 
         

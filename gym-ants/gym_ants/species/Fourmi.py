@@ -163,23 +163,41 @@ class Fourmi(Species):
 
 
 
-    def eat(self, foods):
+    def eat(self, foods, anthill,fourmis):
         self.hasEaten = False
-        for food in foods:
-            if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
-                            food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
-                r = np.random.uniform()
-                if r <0.5 and self.foodCarried==None and self.type != FourmiType.REINE and not self.isEgg:
-                    self.foodCarried = food
-                    food.carried(self.coordinate[0],self.coordinate[1])
-                else:
-                    if (self.foodCarried !=None and self.foodCarried != food) or self.foodCarried == None:
-                        food.eaten()
-                        self.hasEaten = True
-                        self.health += self.bonusHealth
-                        self.death_age+=self.bonusHealth
-                        self.nbAte += 1
-                        self.hungriness = 0
+        if self.type == FourmiType.REINE:
+            for food in foods:
+                if aColideWithB(self.coordinate[0], self.coordinate[1],anthill.radius , food.coordinate[0],
+                                food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
+                    food.eaten()
+                    self.hasEaten = True
+                    self.health += self.bonusHealth
+                    self.death_age += self.bonusHealth
+                    self.nbAte += 1
+                    self.hungriness = 0
+                    for fourmi in fourmis:
+                        if fourmi.isEgg and fourmi.colonieId == self.colonieId:
+                            fourmi.hasEaten = True
+                            fourmi.health += fourmi.bonusHealth
+                            fourmi.death_age += fourmi.bonusHealth
+                            fourmi.nbAte += 1
+                            fourmi.hungriness = 0
+        else:
+            for food in foods:
+                if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
+                                food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
+                    r = np.random.uniform()
+                    if r <0.5 and self.foodCarried==None and self.type != FourmiType.REINE and not self.isEgg:
+                        self.foodCarried = food
+                        food.carried(self.coordinate[0],self.coordinate[1])
+                    else:
+                        if (self.foodCarried !=None and self.foodCarried != food) or self.foodCarried == None:
+                            food.eaten()
+                            self.hasEaten = True
+                            self.health += self.bonusHealth
+                            self.death_age+=self.bonusHealth
+                            self.nbAte += 1
+                            self.hungriness = 0
         if not self.hasEaten:
             self.hungriness += 1
 
@@ -192,6 +210,8 @@ class Fourmi(Species):
         if self.age >= 0 and self.nbAte>=self.reproductionThreshold and self.isEgg:
             self.isEgg = False
             self.age = 0
+            print(self.death_age)
+            print(self.health)
 
     def dying(self):
         self.health -= 1
@@ -236,7 +256,7 @@ class Fourmi(Species):
                 # Si les fourmis qui se rencontrent ne sont pas de la même colonie, elles se battent
                 if creature.colonieId != self.colonieId:
                     if self.isEgg:
-                        if not self.creature.isEgg:
+                        if not creature.isEgg:
                             self.eaten() # L'oeuf se fait manger par la fourmi adverse
                         else:
                             continue # Si les deux fourmis sont des oeufs, rien ne se passe

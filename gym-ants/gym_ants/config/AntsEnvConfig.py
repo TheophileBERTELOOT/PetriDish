@@ -19,7 +19,7 @@ carnivoreReproductionThreshold=3
 carnivoreHungrinessThreshold=25
 
 nbFourmiPerColonie = 5
-nbFourmiColonie = 2
+nbFourmiColonie =2
 timeInEggForm = 500
 fourmiInitRadius=20
 fourmiInitHealth=10000
@@ -34,7 +34,7 @@ positionObstacle = [(100, 100), (200,200)]
 
 
 grassRadius=10
-nbGrass=50
+nbGrass=100
 grassZoneEditRadius=50
 herbivorePas=1
 carnivorePas=1
