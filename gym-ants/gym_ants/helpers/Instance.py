@@ -121,7 +121,6 @@ class Instance(object):
                     self.applyAction(fourmi, actions[fourmiIndex])
                     self.oldType = deepcopy(fourmi.visionRayObject)
                     self.oldDistance = deepcopy(fourmi.visionRayLength)
-                    
 
                 fourmi.eatCarriedFood()
                 if (self.dish.isGoingThroughObstacles(fourmi)) :
@@ -131,7 +130,7 @@ class Instance(object):
                 fourmi.interaction_between_colonies(self.fourmis)
                 fourmi.dying()
                 fourmi.isHatched()
-                fourmi.smell(self.fourmis,self.dish.grasses)
+                fourmi.smell(self.fourmis,self.dish.grasses, self.obstacles)
                 if fourmi.type == FourmiType.REINE:
                     if fourmi.shouldReproduce():
                         newBorn = self.fourmieCreator.Create(parent=fourmi)
@@ -151,8 +150,9 @@ class Instance(object):
 
 
             rewards.append(self._get_reward(fourmi))
-            next_states.append(self.stateFromRayType(fourmi.visionRayObject))
+            next_states.append(self.getState(fourmi))
         self.fourmis += newBorns
+
         for fourmi in fourmiToRemove:
             if fourmi in self.deadBodies:
                 self.deadBodies.remove(fourmi)
@@ -166,7 +166,21 @@ class Instance(object):
         minDist = np.inf
         if len(cell.objectInVisionDistance)>0:
             minDist = min(cell.objectInVisionDistance)
+
+        return minDist ###########
+
+    def closestEnemy(self, cell):
+        minDist = np.inf
+        if len(cell.enemyInVisionDistance)>0:
+            minDist = min(cell.enemyInVisionDistance)
         return minDist
+
+    def closestObstacle(self, cell):
+        minDist = np.inf
+        if len(cell.obstacleInVisionDistance)>0:
+            minDist = min(cell.obstacleInVisionDistance)
+        return minDist
+
 
 
     def calcDistanceReward(self,cell):
@@ -219,6 +233,9 @@ class Instance(object):
             if ray == 1:
                 return np.array([rayIndex+1])
         return np.array([0])
+
+    def getState(self, cell):
+        return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
 
 
 

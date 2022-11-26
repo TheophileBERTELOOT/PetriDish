@@ -3,9 +3,9 @@ import pygame as pg
 from enum import Enum
 
 from gym_ants.species.Species import Species
-from src.Agent import EGreedy
+#from src.Agent import EGreedy
 from gym_ants.helpers.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint,calcAngle
-from src.Qlearning import Qlearning
+# from src.Qlearning import Qlearning
 
 class FourmiType(Enum) :
     REINE = 0
@@ -35,7 +35,7 @@ class Fourmi(Species):
         self.fourmiNbRay=fourmiNbRay
         self.fourmiAngleOfVision =fourmiAngleOfVision
         # self.agent = EGreedy(2, 1000)
-        self.agent = Qlearning(3,self.fourmiNbRay,2)
+        # self.agent = Qlearning(3,self.fourmiNbRay,2)
         self.visionRayCoordinate = []
         self.visionRayLength = []
         self.visionRayObject = []
@@ -120,18 +120,41 @@ class Fourmi(Species):
         self.visionRayObject[indexRay] = None
         self.visionRayLength[indexRay] = lengthRay
 
-    def smell(self,fourmis,grasses):
+    def smell(self,fourmis,grasses, obstacles):
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
         E = self.coordinate
         self.objectInVisionRange = []
         self.objectInVisionDistance = []
+
+        self.enemyInVisionRange = []
+        self.enemyInVisionDistance = []
+
+        self.obstacleInVisionRange = []
+        self.obstacleInVisionDistance = []
+
+
         for grass in grasses:
             C = grass.coordinate
             distance = calcDistanceBetweenTwoPoint(C, E)
             if distance < lengthRay:
                 self.objectInVisionRange.append(grass)
                 self.objectInVisionDistance.append(distance)
+        for fourmi in fourmis:
+            if fourmi.colonieId == self.colonieId:
+                continue
+            C = fourmi.coordinate
+            distance = calcDistanceBetweenTwoPoint(C, E)
+            if distance < lengthRay:
+                self.enemyInVisionRange.append(fourmi)
+                self.enemyInVisionDistance.append(distance)
+        for obstacle in obstacles:
+            C = obstacle.coordinate
+            distance = calcDistanceBetweenTwoPoint(C, E)
+            if distance < lengthRay:
+                self.obstacleInVisionRange.append(fourmi)
+                self.obstacleInVisionDistance.append(distance)
+
         # for indexRay in range(self.fourmiNbRay):
         #     L = self.visionRayCoordinate[indexRay]
         #     E = self.coordinate
@@ -201,17 +224,15 @@ class Fourmi(Species):
         if not self.hasEaten:
             self.hungriness += 1
 
-    def act(self, grasses,deadBodies):
+    """def act(self, grasses,deadBodies):
         food = grasses + deadBodies
         if (self.type == FourmiType.OUVRIERE) :
-            self.agent.play(self, food)
+            self.agent.play(self, food)"""
 
     def isHatched(self):
         if self.age >= 0 and self.nbAte>=self.reproductionThreshold and self.isEgg:
             self.isEgg = False
             self.age = 0
-            print(self.death_age)
-            print(self.health)
 
     def dying(self):
         self.health -= 1
