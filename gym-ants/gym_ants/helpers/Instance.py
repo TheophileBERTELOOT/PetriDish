@@ -117,7 +117,6 @@ class Instance(object):
                         fourmiAntHill = antHill
 
                 if (fourmi.type == FourmiType.OUVRIERE) :
-                    fourmi.eat(food)
                     self.applyAction(fourmi, actions[fourmiIndex], food)
                     self.oldType = deepcopy(fourmi.visionRayObject)
                     self.oldDistance = deepcopy(fourmi.visionRayLength)
@@ -149,9 +148,9 @@ class Instance(object):
                 if fourmi.health < self.bodyDecayingThreshold or fourmi.isEaten:
                     fourmiToRemove.append(fourmi)
 
-            if fourmi not in fourmiToRemove:
-                rewards.append(self._get_reward(fourmi))
-                next_states.append(self.getState(fourmi))
+
+            rewards.append(self._get_reward(fourmi))
+            next_states.append(self.getState(fourmi))
         self.fourmis += newBorns
 
         for fourmi in fourmiToRemove:
@@ -190,39 +189,16 @@ class Instance(object):
         if self.oldClosestFood:
             if closestFood<self.oldClosestFood:
                 self.oldClosestFood = closestFood
-                return self.oldClosestFood/np.sqrt(self.maxX**2+self.maxY**2)
+                return 10
         self.oldClosestFood = closestFood
-        return 1.01
-
-    def getNbFourmiInColonie(self,cell):
-        nbFourmi = 0
-        for fourmi in self.fourmis:
-            if fourmi.colonieId == cell.colonieId:
-                nbFourmi+=1
-        return nbFourmi
-
-    def getQueenCoordinate(self,cell):
-        for fourmi in self.fourmis:
-            if fourmi.colonieId == cell.colonieId and fourmi.type == FourmiType.REINE:
-                return fourmi.coordinate
-        return [0,0]
-
-    def getQueenHealth(self,cell):
-        for fourmi in self.fourmis:
-            if fourmi.colonieId == cell.colonieId and fourmi.type == FourmiType.REINE:
-                return fourmi.health
-        return 0
+        return - 5
 
     def _get_reward(self, cell):
-        # distanceReward = 1-self.calcDistanceReward(cell)
         if cell.hasEaten:
-            distanceReward = 1
+            reward = 1000
         else:
-            distanceReward = 0
-        healthReward = cell.health/cell.initHealth
-        nbFourmiInColonie = self.getNbFourmiInColonie(cell)/len(self.fourmis)
-        queenHealth = self.getQueenHealth(cell)/cell.initHealth
-        return distanceReward+healthReward+nbFourmiInColonie+queenHealth
+            reward = self.calcDistanceReward(cell)
+        return reward
 
 
     def applyAction(self, cell, selectedAction, food):
@@ -236,7 +212,7 @@ class Instance(object):
             cell.dy = np.sin(angle)
             cell.normalize()
         elif selectedAction== 1:
-            angle-=np.pi/24
+            angle-=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
             cell.normalize()
@@ -245,14 +221,13 @@ class Instance(object):
             cell.normalize()
 
         elif selectedAction == 3:
-            cell.eatCarriedFood()
+            cell.eat(food)
         elif selectedAction == 4:
             cell.carryFood(food)
         elif selectedAction == 5:
             cell.dropCarriedFood()
             
     def cellsAct(self, actions):
-        # print('nbFourmi : '+str(len(self.fourmis)))
         self.herbivoresAct()
         self.carnivoresAct()
         next_states, rewards = self.fourmisAct(actions)
@@ -272,8 +247,7 @@ class Instance(object):
         return np.array([0])
 
     def getState(self, cell):
-        queenCoordinate = self.getQueenCoordinate(cell)
-        return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell),queenCoordinate[0],queenCoordinate[1]])
+        return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
 
 
 

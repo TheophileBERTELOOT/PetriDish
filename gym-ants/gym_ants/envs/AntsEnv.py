@@ -12,7 +12,7 @@ from gym_ants.helpers.EventHandler import EventHandler
 import pygame as pg
 
 class AntsEnv(gym.Env):
-	def __init__(self, render=True):
+	def __init__(self, render=False):
 		self.action_space = spaces.Discrete(6)
 		# self.observation_space = spaces.Box(low=0, high= 100000000, shape=(6))
 		self.reward_range = (-200, 200)
@@ -64,7 +64,6 @@ class AntsEnv(gym.Env):
 
 
 	def render(self):
-		print("render")
 		if self._render:
 			self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
 			for e in pg.event.get():
