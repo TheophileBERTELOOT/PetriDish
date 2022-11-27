@@ -135,31 +135,6 @@ class Fourmi(Species):
                 self.obstacleInVisionRange.append(fourmi)
                 self.obstacleInVisionDistance.append(distance)
 
-        # for indexRay in range(self.fourmiNbRay):
-        #     L = self.visionRayCoordinate[indexRay]
-        #     E = self.coordinate
-        #     isColidingOnce = False
-            # for fourmi in fourmis:
-            #     if fourmi != self:
-            #         C = fourmi.coordinate
-            #         if calcDistanceBetweenTwoPoint(C,E) < lengthRay:
-            #             r = fourmi.radius
-            #             isColiding = lineColideWithCircle(L,E,C,r)
-            #             if isColiding :
-            #                 self.updateVisionRay(indexRay,L,E,C,r,0)
-            #                 isColidingOnce = True
-            #                 break
-            # if not isColidingOnce:
-            #     for grass in grasses:
-            #         C = grass.coordinate
-            #         if calcDistanceBetweenTwoPoint(C, E) < lengthRay:
-            #             r = grass.radius
-            #             isColiding = lineColideWithCircle(L, E, C, r)
-            #             if isColiding:
-            #                 self.updateVisionRay(indexRay,L,E,C,r,1)
-            #                 isColidingOnce = True
-            #                 break
-
 
 
 
@@ -211,10 +186,25 @@ class Fourmi(Species):
         if not self.hasEaten:
             self.hungriness += 1
 
-    """def act(self, grasses,deadBodies):
-        food = grasses + deadBodies
-        if (self.type == FourmiType.OUVRIERE) :
-            self.agent.play(self, food)"""
+
+    def dropCarriedFood(self):
+        if self.foodCarried != None:
+            self.foodCarried.isCarried = False
+            self.foodCarried.x = self.coordinate[0]+self.radius*1.5*self.dx
+            self.foodCarried.y = self.coordinate[1]+self.radius*1.5*self.dy
+            self.foodCarried = None
+
+
+    def carryFood(self, foods):
+        for food in foods:
+            if self.foodCarried!=None:
+                break
+            if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
+                            food.coordinate[1]) :
+                self.foodCarried = food
+                food.carried(self.coordinate[0],self.coordinate[1])
+
+
 
     def isHatched(self):
         if self.age >= 0 and self.nbAte>=self.reproductionThreshold and self.isEgg:

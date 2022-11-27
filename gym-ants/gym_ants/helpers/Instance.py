@@ -117,8 +117,7 @@ class Instance(object):
                         fourmiAntHill = antHill
 
                 if (fourmi.type == FourmiType.OUVRIERE) :
-                    actions = np.random.randint(3, size=len(self.fourmis))
-                    self.applyAction(fourmi, actions[fourmiIndex])
+                    self.applyAction(fourmi, actions[fourmiIndex], food)
                     self.oldType = deepcopy(fourmi.visionRayObject)
                     self.oldDistance = deepcopy(fourmi.visionRayLength)
                 else:
@@ -200,15 +199,16 @@ class Instance(object):
             return self.calcDistanceReward(cell)
 
 
-    def applyAction(self, cell, selectedAction):
+    def applyAction(self, cell, selectedAction, food):
 
         angle = cell.angle
 
-        if selectedAction == 0:
+
+        if selectedAction[0] == 0:
             angle+=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
-        elif selectedAction == 1:
+        elif selectedAction[0] == 1:
             angle-=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
@@ -216,6 +216,13 @@ class Instance(object):
             angle = angle
         cell.normalize()
 
+        if selectedAction[1] == 0:
+            cell.eat(food)
+        elif selectedAction[1] == 1:
+            cell.carryFood(food)
+        else:
+            cell.dropCarriedFood()
+            
     def cellsAct(self, actions):
         self.herbivoresAct()
         self.carnivoresAct()
