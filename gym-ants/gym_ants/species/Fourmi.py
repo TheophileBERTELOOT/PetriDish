@@ -81,26 +81,6 @@ class Fourmi(Species):
         self.angle = calcAngle(self.dx,self.dy)
 
 
-    def eatCarriedFood(self):
-        if self.foodCarried != None:
-            if self.foodCarried.isEaten:
-                self.foodCarried = None
-            else:
-                r = np.random.uniform()
-                if r<self.probEatCarriedFood:
-                    self.foodCarried.eaten()
-                    self.foodCarried = None
-                    self.hasEaten = True
-                    self.health += self.bonusHealth
-                    self.nbAte += 1
-                    self.death_age+=self.bonusHealth
-                    self.hungriness = 0
-                elif r>self.probEatCarriedFood and r<50*self.probEatCarriedFood:
-                    self.foodCarried.isCarried = False
-                    self.foodCarried.x = self.coordinate[0]+self.radius*1.5*self.dx
-                    self.foodCarried.y = self.coordinate[1]+self.radius*1.5*self.dy
-                    self.foodCarried = None
-
     def updateVisionRay(self,indexRay,L,E,C,r,type):
         anglePerRay = self.fourmiAngleOfVision / self.fourmiNbRay
         lengthRay = calcDistanceBetweenTwoPoint(E, C)
@@ -184,14 +164,36 @@ class Fourmi(Species):
 
 
 
+    def eat(self,foods):
+        for food in foods:
+            if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
+                            food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
+
+                if (self.foodCarried !=None and self.foodCarried != food) or self.foodCarried == None:
+                    food.eaten()
+                    self.hasEaten = True
+                    self.health += self.bonusHealth
+                    self.death_age+=self.bonusHealth
+                    self.nbAte += 1
+                    self.hungriness = 0
+        if self.foodCarried !=None:
+            self.foodCarried.eaten()
+            self.foodCarried = None
+            self.hasEaten = True
+            self.health += self.bonusHealth
+            self.nbAte += 1
+            self.death_age += self.bonusHealth
+            self.hungriness = 0
+        if not self.hasEaten:
+            self.hungriness += 1
 
 
-    def eat(self, foods, anthill,fourmis):
+    def QeenEat(self, foods, anthill,fourmis):
         self.hasEaten = False
         if self.type == FourmiType.REINE:
             for food in foods:
                 if aColideWithB(self.coordinate[0], self.coordinate[1],anthill.radius , food.coordinate[0],
-                                food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
+                                food.coordinate[1]) and self.hungriness > self.hungrinessThreshold :
                     food.eaten()
                     self.hasEaten = True
                     self.health += self.bonusHealth
@@ -205,22 +207,7 @@ class Fourmi(Species):
                             fourmi.death_age += fourmi.bonusHealth
                             fourmi.nbAte += 1
                             fourmi.hungriness = 0
-        else:
-            for food in foods:
-                if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
-                                food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
-                    r = np.random.uniform()
-                    if r <0.5 and self.foodCarried==None and self.type != FourmiType.REINE and not self.isEgg:
-                        self.foodCarried = food
-                        food.carried(self.coordinate[0],self.coordinate[1])
-                    else:
-                        if (self.foodCarried !=None and self.foodCarried != food) or self.foodCarried == None:
-                            food.eaten()
-                            self.hasEaten = True
-                            self.health += self.bonusHealth
-                            self.death_age+=self.bonusHealth
-                            self.nbAte += 1
-                            self.hungriness = 0
+
         if not self.hasEaten:
             self.hungriness += 1
 

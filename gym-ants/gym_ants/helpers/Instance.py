@@ -115,14 +115,15 @@ class Instance(object):
                 for antHill in self.dish.antHills:
                     if antHill.colonieId == fourmi.colonieId:
                         fourmiAntHill = antHill
-                fourmi.eat(food,fourmiAntHill,self.fourmis)
+
                 if (fourmi.type == FourmiType.OUVRIERE) :
                     actions = np.random.randint(3, size=len(self.fourmis))
                     self.applyAction(fourmi, actions[fourmiIndex])
                     self.oldType = deepcopy(fourmi.visionRayObject)
                     self.oldDistance = deepcopy(fourmi.visionRayLength)
+                else:
+                    fourmi.QeenEat(food,antHill,self.fourmis)
 
-                fourmi.eatCarriedFood()
                 if (self.dish.isGoingThroughObstacles(fourmi)) :
                     fourmi.deviate_obstacles()
                 else :
