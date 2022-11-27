@@ -248,6 +248,10 @@ class Instance(object):
 
     def getState(self, cell):
         return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
+<<<<<<< HEAD
+=======
+
+>>>>>>> e554a785845600dfaed7ec01fe445c4498dcb425
 
 
 
