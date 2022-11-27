@@ -27,9 +27,9 @@ parser.add_argument('--render', type=str2bool, default=False, help='Render or No
 parser.add_argument('--Loadmodel', type=str2bool, default=False, help='Load pretrained model or Not')
 parser.add_argument('--ModelIdex', type=int, default=300000, help='which model to load')
 
-parser.add_argument('--seed', type=int, default=209, help='random seed')
+parser.add_argument('--seed', type=int, default=8888, help='random seed')
 parser.add_argument('--T_horizon', type=int, default=2048, help='lenth of long trajectory')
-parser.add_argument('--Max_train_steps', type=int, default=100, help='Max training steps')
+parser.add_argument('--Max_train_steps', type=int, default=1000000, help='Max training steps')
 parser.add_argument('--save_interval', type=int, default=1e5, help='Model saving interval, in steps.')
 parser.add_argument('--eval_interval', type=int, default=5, help='Model evaluating interval, in steps.')
 
@@ -38,7 +38,7 @@ parser.add_argument('--lambd', type=float, default=0.95, help='GAE Factor')
 parser.add_argument('--clip_rate', type=float, default=0.2, help='PPO Clip rate')
 parser.add_argument('--K_epochs', type=int, default=10, help='PPO update times')
 parser.add_argument('--net_width', type=int, default=64, help='Hidden net width')
-parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
+parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
 parser.add_argument('--l2_reg', type=float, default=0, help='L2 regulization coefficient for Critic')
 parser.add_argument('--batch_size', type=int, default=64, help='lenth of sliced trajectory')
 parser.add_argument('--entropy_coef', type=float, default=0, help='Entropy coefficient of Actor')
@@ -54,13 +54,14 @@ def evaluate_policy(env, model, render):
     for j in range(turns):
         states, done, ep_rewards, steps = env.reset(), False, 0, 0
         steps = 0
-        while not done and steps < 1000:
+        while not done and steps < 3000:
             # Take s actions at test time
             actions, pi_actions = [], []
             for s in states:
                 a, pi_a = model.evaluate(torch.from_numpy(s).float().to(device))
                 actions.append(a)
                 pi_actions.append(pi_a)
+            print(actions)
             next_states, rewards, done, info = env.step(actions)
             ep_r = np.sum(rewards)
             steps += 1
@@ -73,10 +74,9 @@ def evaluate_policy(env, model, render):
 def main():
     env = gym.make('gym_ants:ants-v0')
     eval_env = gym.make('gym_ants:ants-v0')
-    state_dim = 6
+    state_dim = 8
     action_dim = 6
     max_e_steps = 1000
-
     write = opt.write
     if write:
         timenow = str(datetime.now())[0:-10]
@@ -136,23 +136,19 @@ def main():
 
         '''Interact & trian'''
         steps = 0
-        while not done and steps < 1000:
+
+        while not done and steps < max_e_steps:
             traj_lenth += 1
             steps += 1
-            if render:
+
                 # a, pi_a = model.select_action(torch.from_numpy(s).float().to(device))  #stochastic policy
-                actions, pi_actions =[], []
-                for s in states:
-                    a, pi_a = model.evaluate(torch.from_numpy(s).float().to(device))  #deterministic policy
-                    actions.append(a)
-                    pi_actions.append(pi_a)
+            actions, pi_actions =[], []
+            for s in states:
+                a, pi_a = model.evaluate(torch.from_numpy(s).float().to(device))  #deterministic policy
+                actions.append(a)
+                pi_actions.append(pi_a)
+            if render:
                 env.render()
-            else:
-                actions, pi_actions =[], []
-                for s in states:
-                    a, pi_a = model.select_action(torch.from_numpy(s).float().to(device))
-                    actions.append(a)
-                    pi_actions.append(pi_a)
 
             actions = np.array(actions)
             pi_actions = np.array(pi_actions)
