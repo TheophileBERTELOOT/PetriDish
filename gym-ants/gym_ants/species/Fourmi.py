@@ -28,7 +28,8 @@ class Fourmi(Species):
         self.age = -timeInEggForm
         self.isEgg=False
         self.hungriness = 0
-        
+        self.initHealth = initHealth
+
         self.isCarried=False
         self.isEaten = False
         self.fourmiSenseRadius = fourmiSenseRadius
@@ -145,6 +146,16 @@ class Fourmi(Species):
 
 
 
+    def eatCarriedFood(self):
+        if self.foodCarried !=None:
+            self.foodCarried.eaten()
+            self.foodCarried = None
+            self.hasEaten = True
+            self.health += self.bonusHealth
+            self.nbAte += 1
+            self.death_age += self.bonusHealth
+            self.hungriness = 0
+
 
     def eat(self,foods):
         for food in foods:
@@ -158,16 +169,9 @@ class Fourmi(Species):
                     self.death_age+=self.bonusHealth
                     self.nbAte += 1
                     self.hungriness = 0
-        if self.foodCarried !=None:
-            self.foodCarried.eaten()
-            self.foodCarried = None
-            self.hasEaten = True
-            self.health += self.bonusHealth
-            self.nbAte += 1
-            self.death_age += self.bonusHealth
-            self.hungriness = 0
         if not self.hasEaten:
             self.hungriness += 1
+
 
 
     def QeenEat(self, foods, anthill,fourmis):
