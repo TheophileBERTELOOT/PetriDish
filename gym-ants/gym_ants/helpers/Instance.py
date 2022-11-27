@@ -163,20 +163,21 @@ class Instance(object):
 
         
     def closestFood(self,cell):
-        minDist = np.inf
+        minDist = np.sqrt(self.maxX**2 + self.maxY**2)
         if len(cell.objectInVisionDistance)>0:
             minDist = min(cell.objectInVisionDistance)
 
-        return minDist ###########
+
+        return  minDist
 
     def closestEnemy(self, cell):
-        minDist = np.inf
+        minDist = np.sqrt(self.maxX**2 + self.maxY**2)
         if len(cell.enemyInVisionDistance)>0:
             minDist = min(cell.enemyInVisionDistance)
         return minDist
 
     def closestObstacle(self, cell):
-        minDist = np.inf
+        minDist = np.sqrt(self.maxX**2 + self.maxY**2)
         if len(cell.obstacleInVisionDistance)>0:
             minDist = min(cell.obstacleInVisionDistance)
         return minDist
@@ -190,13 +191,14 @@ class Instance(object):
                 self.oldClosestFood = closestFood
                 return 10
         self.oldClosestFood = closestFood
-        return -5
+        return - 5
 
     def _get_reward(self, cell):
         if cell.hasEaten:
             reward = 1000
         else:
-            return self.calcDistanceReward(cell)
+            reward = self.calcDistanceReward(cell)
+        return reward
 
 
     def applyAction(self, cell, selectedAction, food):
@@ -204,23 +206,25 @@ class Instance(object):
         angle = cell.angle
 
 
-        if selectedAction[0] == 0:
+        if selectedAction == 0:
             angle+=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
-        elif selectedAction[0] == 1:
+            cell.normalize()
+        elif selectedAction== 1:
             angle-=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
-        else:
+            cell.normalize()
+        elif selectedAction== 2:
             angle = angle
-        cell.normalize()
+            cell.normalize()
 
-        if selectedAction[1] == 0:
+        elif selectedAction == 3:
             cell.eat(food)
-        elif selectedAction[1] == 1:
+        elif selectedAction == 4:
             cell.carryFood(food)
-        else:
+        elif selectedAction == 5:
             cell.dropCarriedFood()
             
     def cellsAct(self, actions):

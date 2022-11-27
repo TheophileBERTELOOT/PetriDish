@@ -39,8 +39,15 @@ class Fourmi(Species):
         self.visionRayCoordinate = []
         self.visionRayLength = []
         self.visionRayObject = []
+        self.obstacleInVisionRange = []
+        self.obstacleInVisionDistance = []
+
         self.objectInVisionRange = []
-        self.objectInVisionDistance =[]
+        self.objectInVisionDistance = []
+
+        self.enemyInVisionRange = []
+        self.enemyInVisionDistance = []
+        
         anglePerRay = 2*np.pi/self.fourmiNbRay
         lengthRay = self.fourmiSenseRadius + self.radius
 

@@ -12,30 +12,32 @@ from gym_ants.helpers.EventHandler import EventHandler
 import pygame as pg
 
 class AntsEnv(gym.Env):
-	def __init__(self):
-		self.action_space = spaces.Discrete(3)
-		"""self.observation_space = spaces.Box(low=0,
-		high=4,
-		shape=(5, 4),
-		dtype=np.int16)"""
+	def __init__(self, render=False):
+		self.action_space = spaces.Discrete(2)
+		# self.observation_space = spaces.Box(low=0, high= 100000000, shape=(6))
 		self.reward_range = (-200, 200)
 		self.current_episode = 0
 		self.success_episode = []
 		self.fourmis = [] 
-		pg.init()
-		self.motionService = MotionService(SCREEN_SIZE_X,SCREEN_SIZE_Y)
-		self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
+		if render:
+			pg.init()
+			self.motionService = MotionService(SCREEN_SIZE_X,SCREEN_SIZE_Y)
+			self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
+			self.eventHandler = EventHandler(grassZoneEditRadius, self.motionService)
+
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
 		self.carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
 		self.fourmieCreator = FourmieCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbFourmiPerColonie*nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,fourmiPas,  nbFourmiPerColonie,nbFourmiColonie, timeInEggForm, fourmiSenseRadius, fourmiNbRay, fourmiAngleOfVision)
 		self.instance = Instance(SCREEN_SIZE_X, SCREEN_SIZE_Y,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, self.herbivorCreator, self.carnivorCreator, self.fourmieCreator, positionObstacle)
-		self.eventHandler = EventHandler(grassZoneEditRadius, self.motionService)
+
+		self.render = render
 
 
 
 
-	def reset(self, render=True):
-		self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
+	def reset(self):
+		if self.render:
+			self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
 		self.carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
 		self.fourmieCreator = FourmieCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbFourmiPerColonie*nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,fourmiPas,  nbFourmiPerColonie,nbFourmiColonie, timeInEggForm, fourmiSenseRadius, fourmiNbRay, fourmiAngleOfVision)
@@ -44,7 +46,7 @@ class AntsEnv(gym.Env):
 		# Get the current state: array of (nb_agents, state_dim)
 		self.current_state = []
 		for fourmi in self.instance.fourmis:
-			self.current_state.append(self.instance.stateFromRayType(fourmi.visionRayObject))
+			self.current_state.append(self.instance.getState(fourmi))
 		self.current_state = np.array(self.current_state)
 		return self.current_state
 
@@ -61,13 +63,15 @@ class AntsEnv(gym.Env):
 
 
 	def render(self):
-		self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
-		for e in pg.event.get():
-			running = self.eventHandler.handleEvent(e,self.instance)
+		if self.render:
+			self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
+			for e in pg.event.get():
+				running = self.eventHandler.handleEvent(e,self.instance)
 
 
 	def close(self):
-		pg.quit()
+		if self.render:
+			pg.quit()
 
 	
 
