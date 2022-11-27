@@ -12,8 +12,8 @@ from gym_ants.helpers.EventHandler import EventHandler
 import pygame as pg
 
 class AntsEnv(gym.Env):
-	def __init__(self, render=False):
-		self.action_space = spaces.Discrete(2)
+	def __init__(self, render=True):
+		self.action_space = spaces.Discrete(6)
 		# self.observation_space = spaces.Box(low=0, high= 100000000, shape=(6))
 		self.reward_range = (-200, 200)
 		self.current_episode = 0
@@ -30,13 +30,13 @@ class AntsEnv(gym.Env):
 		self.fourmieCreator = FourmieCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbFourmiPerColonie*nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,fourmiPas,  nbFourmiPerColonie,nbFourmiColonie, timeInEggForm, fourmiSenseRadius, fourmiNbRay, fourmiAngleOfVision)
 		self.instance = Instance(SCREEN_SIZE_X, SCREEN_SIZE_Y,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, self.herbivorCreator, self.carnivorCreator, self.fourmieCreator, positionObstacle)
 
-		self.render = render
+		self._render = render
 
 
 
 
 	def reset(self):
-		if self.render:
+		if self._render:
 			self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
 		self.carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
@@ -58,19 +58,21 @@ class AntsEnv(gym.Env):
 		self.instance.updateDish()
 		next_states, rewards =  self.instance.cellsAct(action)
 		self.instance.isGoingThroughWall()
+		self.render()
 		return self.current_state, rewards, done, info
 		
 
 
 	def render(self):
-		if self.render:
+		print("render")
+		if self._render:
 			self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
 			for e in pg.event.get():
 				running = self.eventHandler.handleEvent(e,self.instance)
 
 
 	def close(self):
-		if self.render:
+		if self._render:
 			pg.quit()
 
 	
