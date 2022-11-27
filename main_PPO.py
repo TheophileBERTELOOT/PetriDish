@@ -126,10 +126,10 @@ def main():
     traj_lenth = 0
     total_steps = 0
 
-    score = evaluate_policy(eval_env, model, False)
+    """score = evaluate_policy(eval_env, model, False)
     if write:
         writer.add_scalar('ep_r', score, global_step=total_steps)
-        print('steps: {}'.format(int(total_steps/1000)),'score:', score)
+        print('steps: {}'.format(int(total_steps/1000)),'score:', score)"""
     while total_steps < Max_train_steps:
 
         states, done, steps, ep_r = env.reset(), False, 0, 0
@@ -156,7 +156,7 @@ def main():
                     pi_actions.append(pi_a)
 
             actions = np.array(actions)
-
+            print(actions)
             pi_actions = np.array(pi_actions)
             next_states, rewards, done, info = env.step(actions)
 
