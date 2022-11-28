@@ -161,7 +161,18 @@ class Instance(object):
 
         return np.array(next_states), np.array(rewards)
 
-        
+
+    def getClosestFoodCoordinate(self,cell):
+        minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
+        index = 0
+        if len(cell.objectInVisionDistance) > 0:
+            minDist = min(cell.objectInVisionDistance)
+            index = cell.objectInVisionDistance.index(minDist)
+            return cell.objectInVisionRange[index].coordinate
+
+
+        return [-1,-1]
+
     def closestFood(self,cell):
         minDist = np.sqrt(self.maxX**2 + self.maxY**2)
         if len(cell.objectInVisionDistance)>0:
@@ -247,8 +258,9 @@ class Instance(object):
         return np.array([0])
 
     def getState(self, cell):
-        return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
-
+        # return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
+        closestFoodCoordinate = self.getClosestFoodCoordinate(cell)
+        return np.array([cell.coordinate[0], cell.coordinate[1],closestFoodCoordinate[0],closestFoodCoordinate[1]])
 
 
 

@@ -34,7 +34,7 @@ positionObstacle = [(100, 100), (200,200)]
 
 
 grassRadius=10
-nbGrass=100
+nbGrass=25
 grassZoneEditRadius=50
 herbivorePas=1
 carnivorePas=1

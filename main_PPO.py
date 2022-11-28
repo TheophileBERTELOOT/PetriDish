@@ -73,7 +73,7 @@ def evaluate_policy(env, model, render):
 def main():
     env = gym.make('gym_ants:ants-v0')
     eval_env = gym.make('gym_ants:ants-v0')
-    state_dim = 6
+    state_dim = 4
     action_dim = 6
     max_e_steps = 1000
 
