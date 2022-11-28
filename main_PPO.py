@@ -27,13 +27,13 @@ parser.add_argument('--render', type=str2bool, default=False, help='Render or No
 parser.add_argument('--Loadmodel', type=str2bool, default=False, help='Load pretrained model or Not')
 parser.add_argument('--ModelIdex', type=int, default=300000, help='which model to load')
 
-parser.add_argument('--seed', type=int, default=209, help='random seed')
+parser.add_argument('--seed', type=int, default=42, help='random seed')
 parser.add_argument('--T_horizon', type=int, default=2048, help='lenth of long trajectory')
-parser.add_argument('--Max_train_steps', type=int, default=100, help='Max training steps')
+parser.add_argument('--Max_train_steps', type=int, default=5e7, help='Max training steps')
 parser.add_argument('--save_interval', type=int, default=1e5, help='Model saving interval, in steps.')
-parser.add_argument('--eval_interval', type=int, default=5, help='Model evaluating interval, in steps.')
+parser.add_argument('--eval_interval', type=int, default=5e3, help='Model evaluating interval, in steps.')
 
-parser.add_argument('--gamma', type=float, default=0.99, help='Discounted Factor')
+parser.add_argument('--gamma', type=float, default=1, help='Discounted Factor')
 parser.add_argument('--lambd', type=float, default=0.95, help='GAE Factor')
 parser.add_argument('--clip_rate', type=float, default=0.2, help='PPO Clip rate')
 parser.add_argument('--K_epochs', type=int, default=10, help='PPO update times')
@@ -52,7 +52,7 @@ def evaluate_policy(env, model, render):
     scores = 0
     turns = 3
     for j in range(turns):
-        states, done, ep_rewards, steps = env.reset(), False, 0, 0
+        states, done, ep_r, steps = env.reset(), False, 0, 0
         steps = 0
         while not done and steps < 1000:
             # Take s actions at test time
@@ -62,7 +62,7 @@ def evaluate_policy(env, model, render):
                 actions.append(a)
                 pi_actions.append(pi_a)
             next_states, rewards, done, info = env.step(actions)
-            ep_r = np.sum(rewards)
+            ep_r += np.sum(rewards)
             steps += 1
             states = next_states
             if render:
@@ -73,7 +73,7 @@ def evaluate_policy(env, model, render):
 def main():
     env = gym.make('gym_ants:ants-v0')
     eval_env = gym.make('gym_ants:ants-v0')
-    state_dim = 6
+    state_dim = 1
     action_dim = 6
     max_e_steps = 1000
 
@@ -95,8 +95,8 @@ def main():
 
     seed = opt.seed
     torch.manual_seed(seed)
-    env.seed(seed)
-    eval_env.seed(seed)
+    env.seed(None)
+    eval_env.seed(None)
     np.random.seed(seed)
 
     print('Ants Env: ', ' , state_dim:',state_dim,'  action_dim:',action_dim,'   Random Seed:',seed, '  max_e_steps:',max_e_steps)
@@ -130,6 +130,7 @@ def main():
     if write:
         writer.add_scalar('ep_r', score, global_step=total_steps)
         print('steps: {}'.format(int(total_steps/1000)),'score:', score)"""
+    epoch = 0
     while total_steps < Max_train_steps:
 
         states, done, steps, ep_r = env.reset(), False, 0, 0
@@ -156,7 +157,6 @@ def main():
                     pi_actions.append(pi_a)
 
             actions = np.array(actions)
-            print(actions)
             pi_actions = np.array(pi_actions)
             next_states, rewards, done, info = env.step(actions)
 
@@ -170,24 +170,28 @@ def main():
             '''update if its time'''
             if not render:
                 if traj_lenth % T_horizon == 0:
+                    pass
+                    """print("Fit model")
                     a_loss, c_loss, entropy = model.train()
                     traj_lenth = 0
                     if write:
                         writer.add_scalar('a_loss', a_loss, global_step=total_steps)
                         writer.add_scalar('c_loss', c_loss, global_step=total_steps)
-                        writer.add_scalar('entropy', entropy, global_step=total_steps)
+                        writer.add_scalar('entropy', entropy, global_step=total_steps)"""
 
             '''record & log'''
-            if total_steps % eval_interval == 0:
-                score = evaluate_policy(eval_env, model, False)
+            if total_steps % eval_interval == eval_interval - 1:
+                score = evaluate_policy(env, model, False)
                 if write:
                     writer.add_scalar('ep_r', score, global_step=total_steps)
-                print('Ants Env: ', 'seed:',seed,'steps: {}k'.format(int(total_steps/1000)),'score:', score)
+                print('Ants Env: ', 'seed:',seed,'epoch: {}'.format(steps),'score:', score)
             total_steps += 1
 
             '''save model'''
-            if total_steps % save_interval==0:
-                model.save(total_steps)
+            """if total_steps % save_interval==0:
+                model.save(total_steps)"""
+        epoch +=1
+        #print('Ants Env: ', 'seed:',seed,'epoch: {}'.format(epoch),'score:', ep_r)
 
     env.close()
     eval_env.close()

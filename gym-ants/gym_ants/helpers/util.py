@@ -35,5 +35,6 @@ def calcAngle(cos,sin):
         return angle1
     elif angle1 <np.pi/2 and angle2 <0:
         return angle2
-    elif angle1 > np.pi/2 and angle2 <0 :
+    #elif angle1 > np.pi/2 and angle2 <0 :
+    else:
         return np.pi + angle2

@@ -21,7 +21,7 @@ class FourmieCreator(SpeciesCreator):
         self.senseRadius = senseRadius 
         self.numberRay = numberRay
         self.angleOfVision = angleOfVision
-
+        random.seed(42)
         self.initColor()
 
     def create(self,parent=None) :
@@ -80,10 +80,13 @@ class FourmieCreator(SpeciesCreator):
         else:
 
             angle = random.randint(-12, 12)
+            random.seed(None)
             dx = np.cos(angle)
             dy = np.sin(angle)
-            x = parent.coordinate[0]+(2*parent.radius)*dx
-            y = parent.coordinate[1]+(2*parent.radius)*dy
+            """x = parent.coordinate[0]+(2*parent.radius)*dx
+            y = parent.coordinate[1]+(2*parent.radius)*dy"""
+            x = random.randint(0, self.maxX)
+            y = random.randint(0, self.maxY)
             r = parent.r
             g = parent.g
             b = parent.b

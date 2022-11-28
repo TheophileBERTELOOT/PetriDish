@@ -2,6 +2,7 @@ from gym_ants.environment.Dish import Dish
 from gym_ants.species import Herbivore, Fourmi, Carnivore
 from gym_ants.species import FourmiType
 from gym_ants.environment.Obstacle import Obstacle
+from gym_ants.helpers.util import calcDistanceBetweenTwoPoint
 import random
 import numpy as np
 import pygame as pg
@@ -123,16 +124,17 @@ class Instance(object):
                 else:
                     fourmi.QeenEat(food,antHill,self.fourmis)
 
-                if (self.dish.isGoingThroughObstacles(fourmi)) :
+                """if (self.dish.isGoingThroughObstacles(fourmi)) :
                     fourmi.deviate_obstacles()
                 else :
-                    fourmi.run()
-                fourmi.interaction_between_colonies(self.fourmis)
-                fourmi.dying()
+                    fourmi.run()"""
+                # fourmi.interaction_between_colonies(self.fourmis)
+                # fourmi.dying()
                 fourmi.isHatched()
                 fourmi.smell(self.fourmis,self.dish.grasses, self.obstacles)
                 if fourmi.type == FourmiType.REINE:
-                    if fourmi.shouldReproduce():
+                    if fourmi.shouldReproduce() and False:
+
                         newBorn = self.fourmieCreator.Create(parent=fourmi)
                         newBorn.isEgg = True
                         newBorns.append(newBorn)
@@ -148,9 +150,9 @@ class Instance(object):
                 if fourmi.health < self.bodyDecayingThreshold or fourmi.isEaten:
                     fourmiToRemove.append(fourmi)
 
-
-            rewards.append(self._get_reward(fourmi))
-            next_states.append(self.getState(fourmi))
+            state, reward = self.getStateReward(fourmi)
+            rewards.append(reward)
+            next_states.append(state)
         self.fourmis += newBorns
 
         for fourmi in fourmiToRemove:
@@ -169,6 +171,14 @@ class Instance(object):
 
 
         return  minDist
+
+    def closestFoodCoordinates(self, cell, food):
+        minDist = np.sqrt(self.maxX**2 + self.maxY**2)
+        if len(cell.objectInVisionDistance)>0:
+            minDist = min(cell.objectInVisionDistance)
+
+        return  minDist
+
 
     def closestEnemy(self, cell):
         minDist = np.sqrt(self.maxX**2 + self.maxY**2)
@@ -210,15 +220,18 @@ class Instance(object):
             angle+=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
-            cell.normalize()
+            cell.run()
+            #cell.normalize()
         elif selectedAction== 1:
             angle-=np.pi/12
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
-            cell.normalize()
+            cell.run()
+            #cell.normalize()
         elif selectedAction== 2:
-            angle = angle
-            cell.normalize()
+            return
+            #angle = angle
+            #cell.normalize()
 
         elif selectedAction == 3:
             cell.eat(food)
@@ -246,9 +259,24 @@ class Instance(object):
                 return np.array([rayIndex+1])
         return np.array([0])
 
-    def getState(self, cell):
-        return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
 
+    def getQueenCoordinate(self,cell):
+        for fourmi in self.fourmis:
+            if fourmi.colonieId == cell.colonieId and fourmi.type == FourmiType.REINE:
+                return fourmi.coordinate
+        return [0,0]
+
+    def getState(self, cell):
+        #return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
+        queen_x, queen_y = self.getQueenCoordinate(cell)
+
+        return np.array([cell.coordinate[0], cell.coordinate[1], queen_x, queen_y])
+
+
+    def getStateReward(self, cell):
+        #return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
+        queen_x, queen_y = self.getQueenCoordinate(cell)
+        return np.array([calcDistanceBetweenTwoPoint(cell.coordinate, (queen_x, queen_y))]), -calcDistanceBetweenTwoPoint(cell.coordinate, (queen_x, queen_y))
 
 
 

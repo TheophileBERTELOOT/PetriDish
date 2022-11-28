@@ -21,8 +21,8 @@ class Actor(nn.Module):
 
 
     def forward(self, state):
-        n = torch.tanh(self.l1(state))
-        n = torch.tanh(self.l2(n))
+        n = torch.relu(self.l1(state))
+        n = torch.relu(self.l2(n))
         return n
 
     def pi(self, state, softmax_dim = 0):
@@ -128,7 +128,6 @@ class PPO_discrete(object):
         optim_iter_num = int(math.ceil(s.shape[0] / self.optim_batch_size))
 
         for _ in range(self.K_epochs):
-            print("Hi")
             #Shuffle the trajectory, Good for training
             perm = np.arange(s.shape[0])
             np.random.shuffle(perm)

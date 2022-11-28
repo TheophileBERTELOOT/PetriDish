@@ -46,7 +46,7 @@ class AntsEnv(gym.Env):
 		# Get the current state: array of (nb_agents, state_dim)
 		self.current_state = []
 		for fourmi in self.instance.fourmis:
-			self.current_state.append(self.instance.getState(fourmi))
+			self.current_state.append(self.instance.getStateReward(fourmi)[0])
 		self.current_state = np.array(self.current_state)
 		return self.current_state
 
