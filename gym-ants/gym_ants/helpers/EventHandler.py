@@ -72,14 +72,14 @@ class EventHandler:
                 instance.dish.removeGrassesGrowCoordinates(pos)
 
     def handleObstacleEditMode(self,e,instance):
-        if e.type == pg.MOUSEBUTTONUP:
-            pos = pg.mouse.get_pos()
-            if e.button == 1:
-                instance.dish.addObstaclesCoordinates(pos)
-            elif e.button == 3:
-                    obstacle = self.motionService.GetObstacleByPosition(pos,instance)
-                    if obstacle != None:
-                        instance.dish.removeObstaclesCoordinates(obstacle)
+        pos = pg.mouse.get_pos()
+        if pg.mouse.get_pressed() == (1,0,0):
+            instance.dish.addObstaclesCoordinates(pos)
+
+        elif pg.mouse.get_pressed() == (0,0,1):
+            obstacle = self.motionService.GetObstacleByPosition(pos,instance)
+            if obstacle != None:
+                instance.dish.removeObstaclesCoordinates(obstacle)
 
     def toggleGrassEditMode(self):
         self.grassEditMode = not self.grassEditMode

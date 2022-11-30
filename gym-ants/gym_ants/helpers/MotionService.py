@@ -26,7 +26,7 @@ class MotionService:
         if (isinstance(item, Obstacle)) :
             return item
 
-        return item
+        return None
 
     def GetItem(self, position, instance) :
         arrayPos = np.array(position)
