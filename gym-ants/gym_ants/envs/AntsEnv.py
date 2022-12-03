@@ -18,7 +18,8 @@ class AntsEnv(gym.Env):
 		self.reward_range = (-200, 200)
 		self.current_episode = 0
 		self.success_episode = []
-		self.fourmis = [] 
+		self.fourmis = []
+		self.rewards = [] 
 		if render:
 			pg.init()
 			self.motionService = MotionService(SCREEN_SIZE_X,SCREEN_SIZE_Y)
@@ -33,9 +34,8 @@ class AntsEnv(gym.Env):
 		self._render = render
 
 
-
-
 	def reset(self):
+		self.rewards = []
 		if self._render:
 			self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
@@ -57,6 +57,7 @@ class AntsEnv(gym.Env):
 		done = False
 		self.instance.updateDish()
 		next_states, rewards =  self.instance.cellsAct(action)
+		self.updateCumulReward(rewards)		
 		self.instance.isGoingThroughWall()
 		self.render()
 		return self.current_state, rewards, done, info
@@ -65,10 +66,15 @@ class AntsEnv(gym.Env):
 
 	def render(self):
 		if self._render:
-			self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
+			self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler, self.rewards)
 			for e in pg.event.get():
 				running = self.eventHandler.handleEvent(e,self.instance)
 
+	def updateCumulReward(self, rewards) :
+		if (len(self.rewards) == 0) :
+			self.rewards.append(np.sum(rewards))
+		else :
+			self.rewards.append(np.sum(rewards) + self.rewards[-1])
 
 	def close(self):
 		if self._render:

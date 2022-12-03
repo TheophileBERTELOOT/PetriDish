@@ -1,6 +1,11 @@
 import pygame as pg
 import numpy as np
 import os
+import matplotlib
+matplotlib.use("Agg")
+import pylab
+
+import matplotlib.backends.backend_agg as agg
 class Display:
     def __init__(self,SCREEN_SIZE_X,SCREEN_SIZE_Y,  motionService):
         self.screenSizeX = SCREEN_SIZE_X
@@ -10,11 +15,20 @@ class Display:
         self.nbFourmis = 0
         self.TYPE_REINE = 0
         self.TYPE_OUVRIERE=1
-        self.screen = pg.display.set_mode((SCREEN_SIZE_X, SCREEN_SIZE_Y))
+        self.app = pg.display.set_mode((SCREEN_SIZE_X+300, SCREEN_SIZE_Y))
+        self.screen = pg.Surface((SCREEN_SIZE_X, SCREEN_SIZE_Y))
         self.font = pg.font.Font('freesansbold.ttf', 16)
         self.motionService = motionService
+        self.fig = pylab.figure('cumul ', figsize=[2.5, 2.5], # Inches
+                   dpi=100,        # 100 dots per inch, so the resulting buffer is 400x400 pixels
+                   )
+        self.ax = self.fig.gca()
+        self.can_display_plot = False
+        self.surf = None
 
-    def displayAll(self,herbivores,carnivores,fourmis,dish, eventHandler):
+    def displayAll(self,herbivores,carnivores,fourmis,dish, eventHandler, rewards):
+        self.app.fill((1, 102, 102))
+
         self.screen.fill((255, 255, 255))
         self.displayHerbivores(herbivores)
         self.displayCarnivores(carnivores)
@@ -26,7 +40,22 @@ class Display:
         self.displayInformation()
         self.displaySelectedCellInfo()
         self.displayInstructions(eventHandler.grassEditMode)
+        self.displayPlot(rewards)        
+        self.app.blit(self.screen, (300,0))
         pg.display.flip()
+
+    def displayPlot(self, rewards) :
+        if (len(rewards) % 10 == 0) :
+            self.ax.plot(rewards)
+            self.ax.set_title('Cumm reward ')
+            canvas = agg.FigureCanvasAgg(self.fig)
+            canvas.draw()
+            renderer = canvas.get_renderer()
+            raw_data = renderer.tostring_rgb()
+            self.surf = pg.image.fromstring(raw_data, canvas.get_width_height(),"RGB" )
+            self.can_display_plot = True
+        if (self.can_display_plot) :
+            self.app.blit(self.surf, (20,500))
 
     def displaySelectedCellInfo(self):
         cell = self.motionService.itemSelected
@@ -57,12 +86,13 @@ class Display:
 
 
     def displayInformation(self):
+        pg.draw.rect(self.app, pg.Color((255,255,153)), pg.Rect(20,100,200,65),4,border_radius=5,)
         nbHerbivoreTxt = self.font.render('NbHerbivore : '+str(self.nbHerbivore), True,(0,0,0))
         nbCarnivoreTxt = self.font.render('NbCarnivore : ' + str(self.nbCarnivore), True, (0, 0, 0))
         nbFourmiTxt = self.font.render('NbFourmi : ' + str(self.nbFourmis), True, (0, 0, 0))
-        self.screen.blit(nbHerbivoreTxt,(10,15))
-        self.screen.blit(nbCarnivoreTxt, (10, 30))
-        self.screen.blit(nbFourmiTxt, (10, 45))
+        self.app.blit(nbHerbivoreTxt,(40,105))
+        self.app.blit(nbCarnivoreTxt, (40, 125))
+        self.app.blit(nbFourmiTxt, (40, 145))
 
     def displayInstructions(self,isGrassEditMode):
         if isGrassEditMode:

@@ -1,5 +1,5 @@
 import numpy as np
-
+SCREEN_SIZE_X_ = 1300
 SCREEN_SIZE_X = 1000
 SCREEN_SIZE_Y = 1000
 
@@ -30,7 +30,7 @@ fourmiSenseRadius=150
 fourmiNbRay = 10
 fourmiAngleOfVision = np.pi*2
 
-positionObstacle = [(100, 100), (200,200)]
+positionObstacle = [(500, 100), (500,200)]
 
 
 grassRadius=10

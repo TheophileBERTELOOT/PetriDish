@@ -29,6 +29,7 @@ class EventHandler:
                 self.toggleObstacleEditMode()
         if event.type == pg.MOUSEBUTTONUP:
             pos = pg.mouse.get_pos()
+            pos = (pos[0] - 300, pos[1])
             if event.button == 1:
                 self.selectACell(instance,pos)
 
@@ -66,6 +67,7 @@ class EventHandler:
     def handleGrassEditMode(self,e,instance):
         if e.type == pg.MOUSEBUTTONUP:
             pos = pg.mouse.get_pos()
+            pos = (pos[0] - 300, pos[1])
             if e.button == 1:
                 instance.dish.addGrassesGrowCoordinates(pos)
             elif e.button == 3:
@@ -73,6 +75,7 @@ class EventHandler:
 
     def handleObstacleEditMode(self,e,instance):
         pos = pg.mouse.get_pos()
+        pos = (pos[0] - 300, pos[1])
         if pg.mouse.get_pressed() == (1,0,0):
             instance.dish.addObstaclesCoordinates(pos)
 
