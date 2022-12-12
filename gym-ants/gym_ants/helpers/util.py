@@ -31,9 +31,9 @@ def calcAngle(cos,sin):
     angle2 = np.arcsin(sin)
     if angle1 <=np.pi/2 and angle2>=0:
         return angle1
-    elif angle1 > np.pi/2 and angle2 > 0:
+    elif angle1 >= np.pi/2 and angle2 >= 0:
         return angle1
-    elif angle1 <np.pi/2 and angle2 <0:
+    elif angle1 <=np.pi/2 and angle2 <=0:
         return angle2
-    elif angle1 > np.pi/2 and angle2 <0 :
+    elif angle1 >= np.pi/2 and angle2 <= 0 :
         return np.pi + angle2
