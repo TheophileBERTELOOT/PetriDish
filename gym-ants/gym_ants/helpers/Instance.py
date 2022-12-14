@@ -216,7 +216,6 @@ class Instance(object):
 
         angle = cell.angle
 
-
         if selectedAction == 0:
             angle+=np.pi/12
             cell.dx = np.cos(angle)

@@ -31,7 +31,7 @@ class Dish:
                 break
 
     def addObstaclesCoordinates(self,co):
-        self.add_obstacle(co)
+        self.add_obstacle(co, False)
 
     def removeObstaclesCoordinates(self, obstacle):
         self.obstacles.remove(obstacle)
@@ -46,11 +46,18 @@ class Dish:
 
     def add_obstacles(self, positionsObstacle) :
         for position in positionsObstacle :
-            self.add_obstacle(position)
+            self.add_obstacle(position, True)
 
-    def add_obstacle(self, positionObstacle) :
+    def add_obstacle(self, positionObstacle, with_image) :
         x, y = positionObstacle
-        self.obstacles.append(Obstacle(x,y, 40,40))
+        width, height = self.get_shape(with_image)
+        self.obstacles.append(Obstacle(x,y, width,height, with_image))
+
+    def get_shape(self, with_image) :
+        if with_image :
+            return 40, 40
+        else : 
+            return 20, 20
 
     def init_antHills(self, antQueens) :
         for queen in antQueens : 

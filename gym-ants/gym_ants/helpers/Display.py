@@ -96,7 +96,6 @@ class Display:
                     foodCarriedCoordinate = fourmi.coordinate + np.array([((fourmi.radius+2)*fourmi.dx),((fourmi.radius+2)*fourmi.dy)])
                     pg.draw.circle(self.screen,fourmi.foodCarried.color, foodCarriedCoordinate,fourmi.foodCarried.radius)
 
-
                 # if eventHandler.seeVisionRay:
                 #     for indexRay in range(fourmi.fourmiNbRay):
                 #         pg.draw.line(self.screen,pg.Color((fourmi.r,fourmi.g,fourmi.b)),fourmi.coordinate,fourmi.visionRayCoordinate[indexRay])
@@ -134,8 +133,10 @@ class Display:
             obstacle.update()
             if (obstacle is not None) :
                 shape = obstacle.get_shape()
-               
-                self.screen.blit(obstacle.get_image(), shape)
+                if (obstacle.has_image()) :
+                    self.screen.blit(obstacle.get_image(), shape)
+                else : 
+                    pg.draw.circle(self.screen, pg.Color(0,0,0), (shape.centerx, shape.centery), shape.width/2)
 
     def display_antHill(self, antHills) :
         for antHill in antHills :
