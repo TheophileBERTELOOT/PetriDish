@@ -50,7 +50,7 @@ print(opt)
 
 def evaluate_policy(env, model, render):
     scores = 0
-    turns = 3
+    turns = 1
     for j in range(turns):
         states, done, ep_rewards, steps = env.reset(), False, 0, 0
         steps = 0
@@ -74,10 +74,10 @@ def main():
     env = gym.make('gym_ants:ants-v0')
     eval_env = gym.make('gym_ants:ants-v0')
     state_dim = 4
-    action_dim = 6
+    action_dim = 3
     max_e_steps = 1000
 
-    write = opt.write
+    write = True
     if write:
         timenow = str(datetime.now())[0:-10]
         timenow = ' ' + timenow[0:13] + '_' + timenow[-2::]
@@ -85,7 +85,7 @@ def main():
         if os.path.exists(writepath): shutil.rmtree(writepath)
         writer = SummaryWriter(log_dir=writepath)
 
-    T_horizon = opt.T_horizon
+    T_horizon = 10000
     render = opt.render
     Loadmodel = opt.Loadmodel
     ModelIdex = opt.ModelIdex #which model to load
@@ -131,15 +131,16 @@ def main():
         writer.add_scalar('ep_r', score, global_step=total_steps)
         print('steps: {}'.format(int(total_steps/1000)),'score:', score)"""
     while total_steps < Max_train_steps:
-
+        print('total_steps : ',total_steps)
         states, done, steps, ep_r = env.reset(), False, 0, 0
 
         '''Interact & trian'''
         steps = 0
-        while not done and steps < 1000:
+        while  steps < 300:
+            print('steps : ', steps)
             traj_lenth += 1
             steps += 1
-            if render:
+            if False:
                 # a, pi_a = model.select_action(torch.from_numpy(s).float().to(device))  #stochastic policy
                 actions, pi_actions =[], []
                 for s in states:
@@ -157,6 +158,7 @@ def main():
 
             actions = np.array(actions)
             print(actions)
+            print('buyashaka !!!')
             pi_actions = np.array(pi_actions)
             next_states, rewards, done, info = env.step(actions)
 
@@ -168,17 +170,17 @@ def main():
             
 
             '''update if its time'''
-            if not render:
-                if traj_lenth % T_horizon == 0:
-                    a_loss, c_loss, entropy = model.train()
-                    traj_lenth = 0
-                    if write:
-                        writer.add_scalar('a_loss', a_loss, global_step=total_steps)
-                        writer.add_scalar('c_loss', c_loss, global_step=total_steps)
-                        writer.add_scalar('entropy', entropy, global_step=total_steps)
+                # if not render:
+            a_loss, c_loss, entropy = model.train()
+            traj_lenth = 0
+            print("a_loss : ", a_loss)
+            print("c_loss : ", c_loss)
+            print("entropy : ", entropy)
+
 
             '''record & log'''
             if total_steps % eval_interval == 0:
+                print('je  suis dans le evaluate policy')
                 score = evaluate_policy(eval_env, model, False)
                 if write:
                     writer.add_scalar('ep_r', score, global_step=total_steps)
@@ -188,6 +190,7 @@ def main():
             '''save model'''
             if total_steps % save_interval==0:
                 model.save(total_steps)
+
 
     env.close()
     eval_env.close()

@@ -13,7 +13,7 @@ import pygame as pg
 
 class AntsEnv(gym.Env):
 	def __init__(self, render=True):
-		self.action_space = spaces.Discrete(6)
+		self.action_space = spaces.Discrete(3)
 		# self.observation_space = spaces.Box(low=0, high= 100000000, shape=(6))
 		self.reward_range = (-200, 200)
 		self.current_episode = 0

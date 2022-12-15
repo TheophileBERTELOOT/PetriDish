@@ -67,7 +67,7 @@ class Fourmi(Species):
         if self.type!=FourmiType.REINE and not self.isEgg:
             self.coordinate[0] += self.pas * self.dx
             self.coordinate[1] += self.pas * self.dy
-            self.normalize()
+            # self.normalize()
             if self.foodCarried != None:
                 self.foodCarried.x = self.coordinate[0]+((self.radius+2)*self.dx)
                 self.foodCarried.y = self.coordinate[1]+((self.radius+2)*self.dy)
@@ -75,7 +75,7 @@ class Fourmi(Species):
     def deviate_obstacles(self) :
         self.coordinate[0]-= 1/2 * self.pas*self.dx
         self.coordinate[1]-=1/2 * self.pas*self.dy
-        self.normalize()
+        # self.normalize()
         if self.foodCarried != None:
             self.foodCarried.x = self.coordinate[0]+((self.radius+2)*self.dx)
             self.foodCarried.y = self.coordinate[1]+((self.radius+2)*self.dy)
@@ -136,7 +136,8 @@ class Fourmi(Species):
                 self.enemyInVisionRange.append(fourmi)
                 self.enemyInVisionDistance.append(distance)
         for obstacle in obstacles:
-            C = obstacle.coordinate
+            C = obstacle
+
             distance = calcDistanceBetweenTwoPoint(C, E)
             if distance < lengthRay:
                 self.obstacleInVisionRange.append(fourmi)
@@ -148,16 +149,17 @@ class Fourmi(Species):
 
     def eat(self,foods):
         for food in foods:
+            # if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
+            #                 food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
             if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
-                            food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:
-
-                if (self.foodCarried !=None and self.foodCarried != food) or self.foodCarried == None:
-                    food.eaten()
-                    self.hasEaten = True
-                    self.health += self.bonusHealth
-                    self.death_age+=self.bonusHealth
-                    self.nbAte += 1
-                    self.hungriness = 0
+                            food.coordinate[1]):
+                # if (self.foodCarried !=None and self.foodCarried != food) or self.foodCarried == None:
+                food.eaten()
+                self.hasEaten = True
+                self.health += self.bonusHealth
+                self.death_age+=self.bonusHealth
+                self.nbAte += 1
+                self.hungriness = 0
         if self.foodCarried !=None:
             self.foodCarried.eaten()
             self.foodCarried = None

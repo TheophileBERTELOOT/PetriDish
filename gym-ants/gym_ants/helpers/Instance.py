@@ -31,7 +31,7 @@ class Instance(object):
         self.carnivores = self.carnivorCreator.initSpecies()
         self.fourmis = self.fourmieCreator.initSpecies()
 
-        self.obstacles = []
+        self.obstacles = positionsObstacle
 
         self.deadBodies = []
 
@@ -111,7 +111,9 @@ class Instance(object):
         for fourmiIndex in range(len(self.fourmis)):
             fourmi = self.fourmis[fourmiIndex]
             if fourmi.health > 0:
-                food = self.dish.grasses + self.deadBodies
+                # food = self.dish.grasses + self.deadBodies
+                food = self.dish.grasses
+                fourmi.eat(food)
                 for antHill in self.dish.antHills:
                     if antHill.colonieId == fourmi.colonieId:
                         fourmiAntHill = antHill
@@ -123,30 +125,30 @@ class Instance(object):
                 else:
                     fourmi.QeenEat(food,antHill,self.fourmis)
 
-                if (self.dish.isGoingThroughObstacles(fourmi)) :
-                    fourmi.deviate_obstacles()
-                else :
-                    fourmi.run()
+                # if (self.dish.isGoingThroughObstacles(fourmi)) :
+                #     fourmi.deviate_obstacles()
+                # else :
+                #     fourmi.run()
                 fourmi.interaction_between_colonies(self.fourmis)
-                fourmi.dying()
+                # fourmi.dying()
                 fourmi.isHatched()
                 fourmi.smell(self.fourmis,self.dish.grasses, self.obstacles)
-                if fourmi.type == FourmiType.REINE:
-                    if fourmi.shouldReproduce():
-                        newBorn = self.fourmieCreator.Create(parent=fourmi)
-                        newBorn.isEgg = True
-                        newBorns.append(newBorn)
+                # if fourmi.type == FourmiType.REINE:
+                #     if fourmi.shouldReproduce():
+                #         newBorn = self.fourmieCreator.Create(parent=fourmi)
+                #         newBorn.isEgg = True
+                #         newBorns.append(newBorn)
 
-            else:
-                if fourmi not in self.deadBodies:
-                    fourmi.radius = self.grassRadius
-                    fourmi.r = 255
-                    fourmi.g = 0
-                    fourmi.b = 0
-                    fourmi.color = pg.Color((255,0,0))
-                    self.deadBodies.append(fourmi)
-                if fourmi.health < self.bodyDecayingThreshold or fourmi.isEaten:
-                    fourmiToRemove.append(fourmi)
+            # else:
+            #     if fourmi not in self.deadBodies:
+            #         fourmi.radius = self.grassRadius
+            #         fourmi.r = 255
+            #         fourmi.g = 0
+            #         fourmi.b = 0
+            #         fourmi.color = pg.Color((255,0,0))
+            #         self.deadBodies.append(fourmi)
+            #     if fourmi.health < self.bodyDecayingThreshold or fourmi.isEaten:
+            #         fourmiToRemove.append(fourmi)
 
 
             rewards.append(self._get_reward(fourmi))
@@ -169,6 +171,17 @@ class Instance(object):
             minDist = min(cell.objectInVisionDistance)
             index = cell.objectInVisionDistance.index(minDist)
             return cell.objectInVisionRange[index].coordinate
+
+
+        return [-1,-1]
+
+    def getClosestObstacleCoordinate(self,cell):
+        minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
+        index = 0
+        if len(cell.obstacleInVisionDistance) > 0:
+            minDist = min(cell.obstacleInVisionDistance)
+            index = cell.obstacleInVisionDistance.index(minDist)
+            return cell.obstacleInVisionRange[index].coordinate
 
 
         return [-1,-1]
@@ -196,19 +209,18 @@ class Instance(object):
 
 
     def calcDistanceReward(self,cell):
-        closestFood = self.closestFood(cell)
-        if self.oldClosestFood:
-            if closestFood<self.oldClosestFood:
-                self.oldClosestFood = closestFood
-                return 10
-        self.oldClosestFood = closestFood
-        return - 5
+
+        # if self.ol:
+        #     if closestFood<self.oldClosestFood:
+        #         self.oldClosestFood = closestFood
+        #         return 0
+        # self.oldClosestFood = closestFood
+        return -self.closestObstacle(cell)
 
     def _get_reward(self, cell):
-        if cell.hasEaten:
-            reward = 1000
-        else:
-            reward = self.calcDistanceReward(cell)
+        minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
+
+        reward = self.calcDistanceReward(cell)/minDist
         return reward
 
 
@@ -217,25 +229,24 @@ class Instance(object):
         angle = cell.angle
 
         if selectedAction == 0:
-            angle+=np.pi/12
-            cell.dx = np.cos(angle)
-            cell.dy = np.sin(angle)
-            cell.normalize()
-        elif selectedAction== 1:
-            angle-=np.pi/12
-            cell.dx = np.cos(angle)
-            cell.dy = np.sin(angle)
-            cell.normalize()
-        elif selectedAction== 2:
-            angle = angle
-            cell.normalize()
 
-        elif selectedAction == 3:
-            cell.eat(food)
-        elif selectedAction == 4:
-            cell.carryFood(food)
-        elif selectedAction == 5:
-            cell.dropCarriedFood()
+            angle+=np.pi/8
+            cell.angle = angle
+            cell.dx = np.cos(angle)
+            cell.dy = np.sin(angle)
+        elif selectedAction== 1:
+            angle-=np.pi/8
+            cell.angle = angle
+            cell.dx = np.cos(angle)
+            cell.dy = np.sin(angle)
+        elif selectedAction== 2:
+            cell.run()
+        # elif selectedAction == 3:
+        #     cell.eat(food)
+        # elif selectedAction == 4:
+        #     cell.carryFood(food)
+        # elif selectedAction == 5:
+        #     cell.dropCarriedFood()
             
     def cellsAct(self, actions):
         self.herbivoresAct()
@@ -257,9 +268,10 @@ class Instance(object):
         return np.array([0])
 
     def getState(self, cell):
+        obstacleCoordinate = self.getClosestObstacleCoordinate(cell)
         # return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
         closestFoodCoordinate = self.getClosestFoodCoordinate(cell)
-        return np.array([cell.coordinate[0], cell.coordinate[1],closestFoodCoordinate[0],closestFoodCoordinate[1]])
+        return np.array([cell.coordinate[0]/self.maxX, cell.coordinate[1]/self.maxY,obstacleCoordinate[0]/self.maxX,obstacleCoordinate[1]/self.maxY])
 
 
 

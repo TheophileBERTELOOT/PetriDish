@@ -155,7 +155,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
     environment = gym.make('gym_ants:ants-v0')
     set_random_seed(environment, seed)
 
-    model = NNModel(6, 6)
+    model = NNModel(4, 3)
     nb_trajectories = 10000
 
     source_agent = DQN(environment.action_space, network=model, optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate), loss_function=dqn_loss)
@@ -176,14 +176,12 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
 
         step_count = 1
         mean_loss = []
-        while not trajectory_done and step_count <100:
+        while not trajectory_done and step_count <300:
             actions = []
             for s in states:
                 q_vals =target_agent.predict_on_batch(s.astype(np.float32)) 
                 actions.append(target_agent.get_action(q_vals, epsilon))
-
             next_states, rewards, trajectory_done, _ = environment.step(actions)
-
             G += np.sum(rewards)
             for (s, a, r, next_s) in zip(states, actions, rewards, next_states):
                 replay_buffer.store((s.astype(np.float32)  , a, r, next_s.astype(np.float32)  , trajectory_done))
@@ -201,8 +199,8 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
             states = next_states
             step_count += 1
             
-        if n_trajectories % 100 == 0:
-            loss_mean = np.mean(np.array(loss))
+        if n_trajectories % 10 == 0:
+            loss_mean = loss[-1]
             print(f"After {n_trajectories} trajectories, we have G_0 = {G:.2f}, loss {loss_mean}, epsilon  {epsilon:4f}")
         
 
@@ -212,15 +210,15 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
 
     done = False
     s = environment.reset().astype(np.float32) 
-    """
-    while not done:
-        environment.render()
 
-        q_vals = target_agent.predict_on_batch(s)
-        action = np.argmax(q_vals)
-        next_s, r, done, _ = environment.step(action)
-        s = next_s
-    environment.close()"""
+    # while not done:
+    #     environment.render()
+    #
+    #     q_vals = target_agent.predict_on_batch(s)
+    #     action = np.argmax(q_vals)
+    #     next_s, r, done, _ = environment.step(action)
+    #     s = next_s
+    # environment.close()
     
     fig, subfigs = pyplot.subplots(2, 1, tight_layout=True)
     labels = ["cumulative reward", "Average training loss"]
@@ -247,6 +245,6 @@ if __name__ == "__main__":
     seed = 42
     tau = 0.1
     training_interval = 2
-    learning_rate = 5*1e-4
+    learning_rate = 5*1e-3
 
     run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_rate)

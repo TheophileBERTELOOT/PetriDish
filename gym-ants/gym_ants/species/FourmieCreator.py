@@ -27,7 +27,7 @@ class FourmieCreator(SpeciesCreator):
     def create(self,parent=None) :
 
         if (self.firstFourmiInColonie and parent == None):
-            type = FourmiType.REINE
+            type = FourmiType.OUVRIERE
             parent = None
         else :
             type = FourmiType.OUVRIERE
@@ -57,8 +57,8 @@ class FourmieCreator(SpeciesCreator):
     def Create(self,parent=None,type=1):
 
         if parent == None:
-            x = random.randint(0, self.maxX)
-            y = random.randint(0, self.maxY)
+            x = self.maxX-700
+            y = self.maxY-700
             angle = random.randint(0, self.maxX)
             dx = np.cos(angle)
             dy = np.sin(angle)
