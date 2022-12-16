@@ -161,7 +161,8 @@ class Instance(object):
             if fourmi in self.fourmis:
                 self.fourmis.remove(fourmi)
 
-        return np.array(next_states), np.array(rewards)
+        done = False # A modifier
+        return np.array(next_states), np.array(rewards), done
 
 
     def getClosestFoodCoordinate(self,cell):
@@ -252,8 +253,8 @@ class Instance(object):
     def cellsAct(self, actions):
         self.herbivoresAct()
         self.carnivoresAct()
-        next_states, rewards = self.fourmisAct(actions)
-        return next_states, rewards
+        next_states, rewards, done = self.fourmisAct(actions)
+        return next_states, rewards, done
 
     def updateDish(self):
         self.dish.regrowEatenGrasses()
