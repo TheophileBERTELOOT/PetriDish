@@ -85,7 +85,7 @@ class Fourmi(Species):
         longueur = np.sqrt(self.dx ** 2 + self.dy ** 2)
         self.dx /= longueur
         self.dy /= longueur
-        self.angle = calcAngle(self.dx,self.dy)
+        self.angle = self.angle % np.pi*2
 
 
     def updateVisionRay(self,indexRay,L,E,C,r,type):
@@ -140,7 +140,7 @@ class Fourmi(Species):
 
             distance = calcDistanceBetweenTwoPoint(C, E)
             if distance < lengthRay:
-                self.obstacleInVisionRange.append(fourmi)
+                self.obstacleInVisionRange.append(obstacle)
                 self.obstacleInVisionDistance.append(distance)
 
 

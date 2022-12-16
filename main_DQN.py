@@ -155,7 +155,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
     environment = gym.make('gym_ants:ants-v0')
     set_random_seed(environment, seed)
 
-    model = NNModel(4, 3)
+    model = NNModel(6, 3)
     nb_trajectories = 10000
 
     source_agent = DQN(environment.action_space, network=model, optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate), loss_function=dqn_loss)
@@ -204,7 +204,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
             print(f"After {n_trajectories} trajectories, we have G_0 = {G:.2f}, loss {loss_mean}, epsilon  {epsilon:4f}")
         
 
-        epsilon = max(0.99*epsilon, 0.01)
+        epsilon = max(0.99999*epsilon, 0.01)
         R_trajectories[n_trajectories] = G
         avg_training_loss[n_trajectories] = np.mean(np.array(mean_loss))
 
@@ -240,11 +240,11 @@ if __name__ == "__main__":
     required algorithms if you wish!
     '''
     batch_size = 32
-    gamma = 1
+    gamma = 0.9
     buffer_size = 1e5
     seed = 42
     tau = 0.1
     training_interval = 2
-    learning_rate = 5*1e-3
+    learning_rate = 5*1e-5
 
     run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_rate)

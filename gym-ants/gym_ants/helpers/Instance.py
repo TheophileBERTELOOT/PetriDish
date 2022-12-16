@@ -181,7 +181,7 @@ class Instance(object):
         if len(cell.obstacleInVisionDistance) > 0:
             minDist = min(cell.obstacleInVisionDistance)
             index = cell.obstacleInVisionDistance.index(minDist)
-            return cell.obstacleInVisionRange[index].coordinate
+            return cell.obstacleInVisionRange[index]
 
 
         return [-1,-1]
@@ -227,18 +227,19 @@ class Instance(object):
     def applyAction(self, cell, selectedAction, food):
 
         angle = cell.angle
-
         if selectedAction == 0:
 
             angle+=np.pi/8
             cell.angle = angle
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
+            cell.run()
         elif selectedAction== 1:
             angle-=np.pi/8
             cell.angle = angle
             cell.dx = np.cos(angle)
             cell.dy = np.sin(angle)
+            cell.run()
         elif selectedAction== 2:
             cell.run()
         # elif selectedAction == 3:
@@ -271,7 +272,7 @@ class Instance(object):
         obstacleCoordinate = self.getClosestObstacleCoordinate(cell)
         # return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
         closestFoodCoordinate = self.getClosestFoodCoordinate(cell)
-        return np.array([cell.coordinate[0]/self.maxX, cell.coordinate[1]/self.maxY,obstacleCoordinate[0]/self.maxX,obstacleCoordinate[1]/self.maxY])
+        return np.array([cell.coordinate[0]/self.maxX, cell.coordinate[1]/self.maxY,cell.dx,cell.dy,obstacleCoordinate[0]/self.maxX,obstacleCoordinate[1]/self.maxY])
 
 
 

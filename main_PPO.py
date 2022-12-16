@@ -73,7 +73,7 @@ def evaluate_policy(env, model, render):
 def main():
     env = gym.make('gym_ants:ants-v0')
     eval_env = gym.make('gym_ants:ants-v0')
-    state_dim = 4
+    state_dim = 6
     action_dim = 3
     max_e_steps = 1000
 
@@ -136,7 +136,7 @@ def main():
 
         '''Interact & trian'''
         steps = 0
-        while  steps < 300:
+        while  steps < 500:
             print('steps : ', steps)
             traj_lenth += 1
             steps += 1

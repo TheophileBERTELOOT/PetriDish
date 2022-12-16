@@ -57,8 +57,8 @@ class FourmieCreator(SpeciesCreator):
     def Create(self,parent=None,type=1):
 
         if parent == None:
-            x = self.maxX-700
-            y = self.maxY-700
+            x = self.maxX-300
+            y = self.maxY-300
             angle = random.randint(0, self.maxX)
             dx = np.cos(angle)
             dy = np.sin(angle)
