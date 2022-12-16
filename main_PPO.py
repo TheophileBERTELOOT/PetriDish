@@ -73,8 +73,8 @@ def evaluate_policy(env, model, render):
 def main():
     env = gym.make('gym_ants:ants-v0')
     eval_env = gym.make('gym_ants:ants-v0')
-    state_dim = 6
-    action_dim = 3
+    state_dim = 4
+    action_dim = 4
     max_e_steps = 1000
 
     write = True
@@ -140,7 +140,7 @@ def main():
             print('steps : ', steps)
             traj_lenth += 1
             steps += 1
-            if False:
+            if True:
                 # a, pi_a = model.select_action(torch.from_numpy(s).float().to(device))  #stochastic policy
                 actions, pi_actions =[], []
                 for s in states:
@@ -169,29 +169,30 @@ def main():
             states = next_states
             
 
-            '''update if its time'''
-                # if not render:
-            a_loss, c_loss, entropy = model.train()
-            traj_lenth = 0
-            print("a_loss : ", a_loss)
-            print("c_loss : ", c_loss)
-            print("entropy : ", entropy)
+
 
 
             '''record & log'''
-            if total_steps % eval_interval == 0:
-                print('je  suis dans le evaluate policy')
-                score = evaluate_policy(eval_env, model, False)
-                if write:
-                    writer.add_scalar('ep_r', score, global_step=total_steps)
-                print('Ants Env: ', 'seed:',seed,'steps: {}k'.format(int(total_steps/1000)),'score:', score)
-            total_steps += 1
 
             '''save model'''
             if total_steps % save_interval==0:
                 model.save(total_steps)
 
+        '''update if its time'''
+        if total_steps % eval_interval == 0:
+            print('je  suis dans le evaluate policy')
+            score = evaluate_policy(eval_env, model, False)
+            if write:
+                writer.add_scalar('ep_r', score, global_step=total_steps)
+            print('Ants Env: ', 'seed:', seed, 'steps: {}k'.format(int(total_steps / 1000)), 'score:', score)
+        total_steps += 1
 
+        # if not render:
+        a_loss, c_loss, entropy = model.train()
+        traj_lenth = 0
+        print("a_loss : ", a_loss)
+        print("c_loss : ", c_loss)
+        print("entropy : ", entropy)
     env.close()
     eval_env.close()
 

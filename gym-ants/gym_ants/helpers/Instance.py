@@ -220,28 +220,36 @@ class Instance(object):
     def _get_reward(self, cell):
         minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
 
-        reward = self.calcDistanceReward(cell)/minDist
+        reward = self.calcDistanceReward(cell)
         return reward
 
 
     def applyAction(self, cell, selectedAction, food):
 
         angle = cell.angle
-        if selectedAction == 0:
-
-            angle+=np.pi/8
-            cell.angle = angle
-            cell.dx = np.cos(angle)
-            cell.dy = np.sin(angle)
-            cell.run()
-        elif selectedAction== 1:
-            angle-=np.pi/8
-            cell.angle = angle
-            cell.dx = np.cos(angle)
-            cell.dy = np.sin(angle)
-            cell.run()
-        elif selectedAction== 2:
-            cell.run()
+        # if selectedAction == 0:
+        #
+        #     angle+=np.pi/12
+        #     cell.angle = angle
+        #     cell.dx = np.cos(angle)
+        #     cell.dy = np.sin(angle)
+        #     cell.run()
+        # elif selectedAction== 1:
+        #     angle-=np.pi/12
+        #     cell.angle = angle
+        #     cell.dx = np.cos(angle)
+        #     cell.dy = np.sin(angle)
+        #     cell.run()
+        # elif selectedAction== 2:
+        #     cell.run()
+        if selectedAction ==0:
+            cell.coordinate[0]+=2
+        elif selectedAction == 1:
+            cell.coordinate[0] -= 2
+        elif selectedAction == 2:
+            cell.coordinate[1] += 2
+        elif selectedAction == 3:
+            cell.coordinate[1] -= 2
         # elif selectedAction == 3:
         #     cell.eat(food)
         # elif selectedAction == 4:
@@ -272,7 +280,7 @@ class Instance(object):
         obstacleCoordinate = self.getClosestObstacleCoordinate(cell)
         # return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
         closestFoodCoordinate = self.getClosestFoodCoordinate(cell)
-        return np.array([cell.coordinate[0]/self.maxX, cell.coordinate[1]/self.maxY,cell.dx,cell.dy,obstacleCoordinate[0]/self.maxX,obstacleCoordinate[1]/self.maxY])
+        return np.array([cell.coordinate[0]/self.maxX, cell.coordinate[1]/self.maxY,obstacleCoordinate[0]/self.maxX,obstacleCoordinate[1]/self.maxY])
 
 
 

@@ -59,7 +59,7 @@ class FourmieCreator(SpeciesCreator):
         if parent == None:
             x = self.maxX-300
             y = self.maxY-300
-            angle = random.randint(0, self.maxX)
+            angle = self.maxX
             dx = np.cos(angle)
             dy = np.sin(angle)
             radius = self.initRadius
@@ -79,7 +79,7 @@ class FourmieCreator(SpeciesCreator):
 
         else:
 
-            angle = random.randint(-12, 12)
+            angle = 12
             dx = np.cos(angle)
             dy = np.sin(angle)
             x = parent.coordinate[0]+(2*parent.radius)*dx
