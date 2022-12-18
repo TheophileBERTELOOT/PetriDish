@@ -12,15 +12,14 @@ from gym_ants.helpers.EventHandler import EventHandler
 import pygame as pg
 
 class AntsEnv(gym.Env):
-<<<<<<< HEAD
 	def __init__(self, render=True):
-		self.action_space = spaces.Discrete(4)
+		self.action_space = spaces.Discrete(2)
 		# self.observation_space = spaces.Box(low=0, high= 100000000, shape=(6))
 		self.reward_range = (-500, 200)
 		self.current_episode = 0
 		self.success_episode = []
 		self.fourmis = [] 
-		self.render_init = False
+		self.render_init = True
 
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
 		self.carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
@@ -53,12 +52,12 @@ class AntsEnv(gym.Env):
 		self.instance.updateDish()
 		next_states, rewards, done =  self.instance.cellsAct(action)
 		self.instance.isGoingThroughWall()
-		return self.current_state, rewards, done, info
+		return next_states, rewards, done, info
 		
 
 
 	def render(self):
-		if not self.render_init:
+		if  self.render_init:
 			pg.init()
 			self.motionService = MotionService(SCREEN_SIZE_X,SCREEN_SIZE_Y)
 			self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)

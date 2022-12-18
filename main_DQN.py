@@ -5,6 +5,8 @@ import numpy as np
 import gym
 import torch
 import random
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot
 
 
@@ -155,8 +157,8 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
     environment = gym.make('gym_ants:ants-v0')
     set_random_seed(environment, seed)
 
-    model = NNModel(4, 4)
-    nb_trajectories = 300
+    model = NNModel(2, 4)
+    nb_trajectories = 500
 
     source_agent = DQN(environment.action_space, network=model, optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate), loss_function=dqn_loss)
     target_agent = DQN(environment.action_space, network=model, optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate), loss_function=dqn_loss)
@@ -173,16 +175,15 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
         G = 0
 
         states = environment.reset()
-
         step_count = 1
         mean_loss = []
-        while not trajectory_done and step_count <400:
+        while not trajectory_done and step_count <600:
+            environment.render()
             actions = []
             for s in states:
                 q_vals =target_agent.predict_on_batch(s.astype(np.float32)) 
                 actions.append(target_agent.get_action(q_vals, epsilon))
             next_states, rewards, trajectory_done, _ = environment.step(actions)
-
             G += np.sum(rewards)
             for (s, a, r, next_s) in zip(states, actions, rewards, next_states):
                 replay_buffer.store((s.astype(np.float32)  , a, r, next_s.astype(np.float32)  , trajectory_done))
@@ -201,17 +202,18 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
             step_count += 1
             
         if n_trajectories % 10 == 0:
+
             loss_mean = loss[-1]
             print(f"After {n_trajectories} trajectories, we have G_0 = {G:.2f}, loss {loss_mean}, epsilon  {epsilon:4f}")
         
 
-        epsilon = max(0.95*epsilon, 0.01)
+        epsilon = max(0.99*epsilon, 0.01)
         R_trajectories[n_trajectories] = G
         avg_training_loss[n_trajectories] = np.mean(np.array(mean_loss))
 
     done = False
-    s = environment.reset().astype(np.float32) 
-
+    s = environment.reset().astype(np.float32)
+    environment.close()
     # while not done:
     #     environment.render()
     #
@@ -220,7 +222,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
     #     next_s, r, done, _ = environment.step(action)
     #     s = next_s
     # environment.close()
-    
+
     fig, subfigs = pyplot.subplots(2, 1, tight_layout=True)
     labels = ["cumulative reward", "Average training loss"]
     x_labels = ['episodes','episodes']
@@ -229,8 +231,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
         subfig.plot(fig_to_plot[index], label=labels[index])
         subfig.set_xlabel(x_labels[index])
         subfig.legend()
-
-    pyplot.show()
+    pyplot.savefig('test.png')
     
 
 if __name__ == "__main__":
@@ -242,10 +243,10 @@ if __name__ == "__main__":
     '''
     batch_size =64
     gamma = 0.9
-    buffer_size = 2e5
+    buffer_size = 4e5
     seed = 42
     tau = 0.1
-    training_interval = 5
-    learning_rate = 1*1e-3
+    training_interval = 3
+    learning_rate = 1*1e-4
 
     run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_rate)

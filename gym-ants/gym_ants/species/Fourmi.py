@@ -124,9 +124,8 @@ class Fourmi(Species):
         for grass in grasses:
             C = grass.coordinate
             distance = calcDistanceBetweenTwoPoint(C, E)
-            if distance < lengthRay:
-                self.objectInVisionRange.append(grass)
-                self.objectInVisionDistance.append(distance)
+            self.objectInVisionRange.append(grass)
+            self.objectInVisionDistance.append(distance)
         for fourmi in fourmis:
             if fourmi.colonieId == self.colonieId:
                 continue
@@ -148,6 +147,7 @@ class Fourmi(Species):
 
 
     def eat(self,foods):
+        self.hasEaten = False
         for food in foods:
             # if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
             #                 food.coordinate[1]) and self.hungriness > self.hungrinessThreshold:

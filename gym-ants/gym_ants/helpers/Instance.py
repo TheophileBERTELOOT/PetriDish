@@ -210,17 +210,14 @@ class Instance(object):
 
 
     def calcDistanceReward(self,cell):
+        minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
 
-        # if self.ol:
-        #     if closestFood<self.oldClosestFood:
-        #         self.oldClosestFood = closestFood
-        #         return 0
-        # self.oldClosestFood = closestFood
-        return -self.closestObstacle(cell)
+        return -self.closestFood(cell)/minDist
 
     def _get_reward(self, cell):
         minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
-
+        if cell.hasEaten:
+            return 100
         reward = self.calcDistanceReward(cell)
         return reward
 
@@ -244,13 +241,13 @@ class Instance(object):
         # elif selectedAction== 2:
         #     cell.run()
         if selectedAction ==0:
-            cell.coordinate[0]+=2
+            cell.coordinate[0]+=3
         elif selectedAction == 1:
-            cell.coordinate[0] -= 2
+            cell.coordinate[0] -= 3
         elif selectedAction == 2:
-            cell.coordinate[1] += 2
+            cell.coordinate[1] += 3
         elif selectedAction == 3:
-            cell.coordinate[1] -= 2
+            cell.coordinate[1] -= 3
         # elif selectedAction == 3:
         #     cell.eat(food)
         # elif selectedAction == 4:
@@ -278,10 +275,28 @@ class Instance(object):
         return np.array([0])
 
     def getState(self, cell):
+        minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
         obstacleCoordinate = self.getClosestObstacleCoordinate(cell)
         # return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
         closestFoodCoordinate = self.getClosestFoodCoordinate(cell)
-        return np.array([cell.coordinate[0]/self.maxX, cell.coordinate[1]/self.maxY,obstacleCoordinate[0]/self.maxX,obstacleCoordinate[1]/self.maxY])
+
+
+        if closestFoodCoordinate[0] > cell.coordinate[0] +10:
+            droite=1
+        elif closestFoodCoordinate[0] < cell.coordinate[0] -10:
+            droite = -1
+        else:
+            droite = 0
+
+        if closestFoodCoordinate[1]> cell.coordinate[1]+10:
+            haut = 1
+        elif closestFoodCoordinate[1] < cell.coordinate[1] - 10:
+            haut = -1
+        else:
+            haut = 0
+
+        # return np.array([cell.coordinate[0], cell.coordinate[1],closestFoodCoordinate[0],closestFoodCoordinate[1]])
+        return np.array([droite,haut])
 
 
 

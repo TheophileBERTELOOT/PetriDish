@@ -1,7 +1,7 @@
 import numpy as np
 
-SCREEN_SIZE_X = 1000
-SCREEN_SIZE_Y = 1000
+SCREEN_SIZE_X = 800
+SCREEN_SIZE_Y = 800
 
 nbHerbivore = 0
 herbivoreInitRadius=20
@@ -18,7 +18,7 @@ carnivoreBonusHealthWhenEat=10000
 carnivoreReproductionThreshold=3
 carnivoreHungrinessThreshold=25
 
-nbFourmiPerColonie = 3
+nbFourmiPerColonie = 2
 nbFourmiColonie =1
 timeInEggForm = 500
 fourmiInitRadius=20

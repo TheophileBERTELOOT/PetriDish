@@ -38,8 +38,21 @@ class Dish:
 
     def initGrasses(self):
         for _ in range(self.nbGrass):
-            x = random.randint(0, self.maxX)
-            y = random.randint(0, self.maxY)
+            r = random.random()
+            if r > 0.5:
+                r = random.random()
+                x = random.randint(0, self.maxX)
+                if r > 0.5:
+                    y = random.randint(0, 100)
+                else:
+                    y = random.randint(self.maxY - 100, self.maxY)
+            else:
+                r = random.random()
+                y = random.randint(0, self.maxY)
+                if r > 0.5:
+                    x = random.randint(0, 100)
+                else:
+                    x = random.randint(self.maxX - 100, self.maxX)
             radius= self.grassRadius
             grass = Grass(x,y,radius,self.maxX,self.maxY)
             self.grasses.append(grass)
@@ -72,8 +85,22 @@ class Dish:
                     grass.coordinate[0] = random.randint(selectedZone[0]-self.grassZoneEditRadius,selectedZone[0]+self.grassZoneEditRadius)
                     grass.coordinate[1] = random.randint(selectedZone[1] - self.grassZoneEditRadius,selectedZone[1] + self.grassZoneEditRadius)
                 else:
-                    grass.coordinate[0] = random.randint(0,self.maxX)
-                    grass.coordinate[1] = random.randint(0, self.maxY)
+
+                    r = random.random()
+                    if r > 0.5:
+                        r = random.random()
+                        grass.coordinate[0] = random.randint(0, self.maxX)
+                        if r > 0.5:
+                            grass.coordinate[1] = random.randint(0, 100)
+                        else:
+                            grass.coordinate[1] = random.randint(self.maxY - 100, self.maxY)
+                    else:
+                        r = random.random()
+                        grass.coordinate[1] = random.randint(0, self.maxY)
+                        if r > 0.5:
+                            grass.coordinate[0] = random.randint(0, 100)
+                        else:
+                            grass.coordinate[0] = random.randint(self.maxX - 100, self.maxX)
 
     def isGoingThroughWall(self,cells):
         for cell in cells:
