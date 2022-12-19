@@ -13,20 +13,18 @@ import pygame as pg
 
 class AntsEnv(gym.Env):
 	def __init__(self, render=True):
-		self.action_space = spaces.Discrete(2)
+		self.action_space = spaces.Discrete(4)
 		# self.observation_space = spaces.Box(low=0, high= 100000000, shape=(6))
 		self.reward_range = (-500, 200)
 		self.current_episode = 0
 		self.success_episode = []
 		self.fourmis = [] 
-		self.render_init = True
+		self.render_init = False
 
 		self.herbivorCreator = HerbivorCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbHerbivore, herbivoreInitRadius,herbivoreInitHealth, herbivoreBonusHealthWhenEat, herbivoreReproductionThreshold, herbivoreHungrinessThreshold, herbivorePas)
 		self.carnivorCreator = CarnivoreCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbCarnivore,carnivoreInitRadius,carnivoreInitHealth,carnivoreBonusHealthWhenEat, carnivoreReproductionThreshold, carnivoreHungrinessThreshold, carnivorePas)
 		self.fourmieCreator = FourmieCreator(SCREEN_SIZE_X, SCREEN_SIZE_Y, nbFourmiPerColonie*nbFourmiColonie,fourmiInitRadius,fourmiInitHealth,fourmiBonusHealthWhenEat,fourmiReproductionThreshold,fourmiHungrinessThreshold,fourmiPas,  nbFourmiPerColonie,nbFourmiColonie, timeInEggForm, fourmiSenseRadius, fourmiNbRay, fourmiAngleOfVision)
 		self.instance = Instance(SCREEN_SIZE_X, SCREEN_SIZE_Y,nbGrass,grassRadius,grassZoneEditRadius,bodyDecayingThreshold, self.herbivorCreator, self.carnivorCreator, self.fourmieCreator, positionObstacle)
-
-		self._render = render
 
 
 
@@ -57,12 +55,13 @@ class AntsEnv(gym.Env):
 
 
 	def render(self):
-		if  self.render_init:
+		if  not self.render_init:
 			pg.init()
 			self.motionService = MotionService(SCREEN_SIZE_X,SCREEN_SIZE_Y)
 			self.display = Display(SCREEN_SIZE_X,SCREEN_SIZE_Y, self.motionService)
 			self.eventHandler = EventHandler(grassZoneEditRadius, self.motionService)
 			self.render_init = True
+
 		self.display.displayAll(self.instance.herbivores,self.instance.carnivores,self.instance.fourmis,self.instance.dish, self.eventHandler)
 		for e in pg.event.get():
 			running = self.eventHandler.handleEvent(e,self.instance)

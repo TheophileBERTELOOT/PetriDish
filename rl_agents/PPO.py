@@ -12,12 +12,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class Actor(nn.Module):
-    def __init__(self, state_dim, action_dim, net_width):
+    def __init__(self, state_dim, action_dim, hidden_dim):
         super(Actor, self).__init__()
 
-        self.l1 = nn.Linear(state_dim, net_width)
-        self.l2 = nn.Linear(net_width, net_width)
-        self.l3 = nn.Linear(net_width, action_dim)
+        self.l1 = nn.Linear(state_dim, hidden_dim)
+        self.l2 = nn.Linear(hidden_dim, hidden_dim)
+        self.l3 = nn.Linear(hidden_dim, action_dim)
 
 
     def forward(self, state):
@@ -32,12 +32,12 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):
-    def __init__(self, state_dim,net_width):
+    def __init__(self, state_dim,hidden_dim):
         super(Critic, self).__init__()
 
-        self.C1 = nn.Linear(state_dim, net_width)
-        self.C2 = nn.Linear(net_width, net_width)
-        self.C3 = nn.Linear(net_width, 1)
+        self.C1 = nn.Linear(state_dim, hidden_dim)
+        self.C2 = nn.Linear(hidden_dim, hidden_dim)
+        self.C3 = nn.Linear(hidden_dim, 1)
 
     def forward(self, state):
         v = torch.relu(self.C1(state))
@@ -46,41 +46,32 @@ class Critic(nn.Module):
         return v
 
 
+class PPO():
+    def __init__(self, state_dim, action_dim, hidden_dim=200, gamma=0.99, 
+                                                lmbda=0.95, lr=1e-4, 
+                                                clip_rate=0.2, 
+                                                batch_size=64,
+                                                entropy_coef_decay=0.99,
+                                                entropy_coef = 1e-3,
+                                                n_epochs=10,
+                                                weight_decay=1e-3):
 
-class PPO_discrete(object):
-    def __init__(
-            self,
-            state_dim,
-            action_dim,
-            gamma=0.99,
-            lambd=0.95,
-            net_width=200,
-            lr=1e-4,
-            clip_rate=0.2,
-            K_epochs=10,
-            batch_size=64,
-            l2_reg=1e-3,
-            entropy_coef = 1e-3,
-            adv_normalization = False,
-            entropy_coef_decay = 0.99,
-    ):
 
-        self.actor = Actor(state_dim, action_dim, net_width).to(device)
-        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=lr)
+        self.actor = Actor(state_dim, action_dim, hidden_dim).to(device)
+        self.critic = Critic(state_dim, hidden_dim).to(device)
 
-        self.critic = Critic(state_dim, net_width).to(device)
-        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=lr)
+        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=lr, weight_decay=weight_decay)
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=lr, weight_decay=weight_decay)
         
-        self.s_dim = state_dim
+        self.state_dim = state_dim
         self.data = []
         self.gamma = gamma
-        self.lambd = lambd
+        self.lmbda = lmbda
         self.clip_rate = clip_rate
-        self.K_epochs = K_epochs
+        self.n_epochs = n_epochs
         self.optim_batch_size = batch_size
-        self.l2_reg = l2_reg
+
         self.entropy_coef = entropy_coef
-        self.adv_normalization = adv_normalization
         self.entropy_coef_decay = entropy_coef_decay
 
     def select_action(self, state):
@@ -101,34 +92,30 @@ class PPO_discrete(object):
 
 
     def train(self):
-        s, a, r, s_prime, old_prob_a,done_mask= self.make_batch()
+        s, a, r, s_prime, old_prob_a,done= self.make_batch()
         self.entropy_coef *= self.entropy_coef_decay #exploring decay
 
-        ''' Use TD+GAE+LongTrajectory to compute Advantage and TD target'''
         with torch.no_grad():
             vs = self.critic(s)
-            vs_ = self.critic(s_prime)
+            vs_prime = self.critic(s_prime)
 
-            deltas = r + self.gamma * vs_  - vs
+            deltas = r + self.gamma * vs_prime  - vs
             deltas = deltas.cpu().flatten().numpy()
             adv = [0]
 
-            for dlt, mask in zip(deltas[::-1], done_mask.cpu().flatten().numpy()[::-1]):
-                advantage = dlt + self.gamma * self.lambd * adv[-1] * (1 - mask)
+            for delta in deltas[::-1]:
+                advantage = delta + self.gamma * self.lmbda * adv[-1] 
                 adv.append(advantage)
             adv.reverse()
             adv = copy.deepcopy(adv[0:-1])
             adv = torch.tensor(adv).unsqueeze(1).float().to(device)
             td_target = adv + vs
-            if self.adv_normalization:
-                adv = (adv - adv.mean()) / ((adv.std() + 1e-4))  #useful in some envs
+            adv = (adv - adv.mean()) / ((adv.std() + 1e-4))  
 
-        """PPO update"""
-        #Slice long trajectopy into short trajectory and perform mini-batch PPO update
+
         optim_iter_num = int(math.ceil(s.shape[0] / self.optim_batch_size))
 
-        for _ in range(self.K_epochs):
-            #Shuffle the trajectory, Good for training
+        for _ in range(self.n_epochs):
             perm = np.arange(s.shape[0])
             np.random.shuffle(perm)
             perm = torch.LongTensor(perm).to(device)
@@ -156,9 +143,6 @@ class PPO_discrete(object):
 
                 '''critic update'''
                 c_loss = (self.critic(s[index]) - td_target[index]).pow(2).mean()
-                for name, param in self.critic.named_parameters():
-                    if 'weight' in name:
-                        c_loss += param.pow(2).sum() * self.l2_reg
 
                 self.critic_optimizer.zero_grad()
                 c_loss.backward()
@@ -168,7 +152,7 @@ class PPO_discrete(object):
     def make_batch(self):
         l = len(self.data)
         s_lst, a_lst, r_lst, s_prime_lst, prob_a_lst, done_lst= \
-            np.zeros((l,self.s_dim)), np.zeros((l,1)), np.zeros((l,1)), np.zeros((l,self.s_dim)), np.zeros((l,1)), np.zeros((l,1))
+            np.zeros((l,self.state_dim)), np.zeros((l,1)), np.zeros((l,1)), np.zeros((l,self.state_dim)), np.zeros((l,1)), np.zeros((l,1))
             
         for i,transition in enumerate(self.data):
             s_lst[i], a_lst[i],r_lst[i] ,s_prime_lst[i] ,prob_a_lst[i] ,done_lst[i]  = transition
@@ -178,7 +162,7 @@ class PPO_discrete(object):
 
         '''list to tensor'''
         with torch.no_grad():
-            s,a,r,s_prime,prob_a,done_mask = \
+            s,a,r,s_prime,prob_a,done = \
                 torch.tensor(s_lst, dtype=torch.float).to(device), \
                 torch.tensor(a_lst, dtype=torch.int64).to(device), \
                 torch.tensor(r_lst, dtype=torch.float).to(device), \
@@ -186,7 +170,7 @@ class PPO_discrete(object):
                 torch.tensor(prob_a_lst, dtype=torch.float).to(device), \
                 torch.tensor(done_lst, dtype=torch.float).to(device), \
 
-        return s, a, r, s_prime, prob_a,done_mask
+        return s, a, r, s_prime, prob_a,done
 
     def put_data(self, transition):
         self.data.append(transition)
