@@ -1,11 +1,9 @@
 import gym
 import torch
-import numpy as np
-from rl_agents.PPO import device, PPO
-from torch.utils.tensorboard import SummaryWriter
 import os, shutil
-from datetime import datetime
-
+import numpy as np
+from tqdm import tqdm
+from rl_agents.PPO import device, PPO
 
 
 def evaluate_policy(env, model, render):
@@ -14,6 +12,7 @@ def evaluate_policy(env, model, render):
     for j in range(turns):
         states, done, ep_rewards, steps = env.reset(), False, 0, 0
         steps = 0
+        ep_r = 0
         while not done and steps < 1000:
             actions, pi_actions = [], []
             for s in states:
@@ -21,7 +20,7 @@ def evaluate_policy(env, model, render):
                 actions.append(a)
                 pi_actions.append(pi_a)
             next_states, rewards, done, info = env.step(actions)
-            ep_r = np.sum(rewards)
+            ep_r += np.sum(rewards)
             steps += 1
             states = next_states
             if render:
@@ -36,16 +35,6 @@ def main():
     state_dim = 6
     action_dim = 3
     max_e_steps = 1000
-
-    write = True
-    if write:
-        timenow = str(datetime.now())[0:-10]
-        timenow = ' ' + timenow[0:13] + '_' + timenow[-2::]
-        writepath = 'runs'+ timenow
-        if os.path.exists(writepath): shutil.rmtree(writepath)
-        writer = SummaryWriter(log_dir=writepath)
-
-    
 
     seed = 42
     torch.manual_seed(seed)
@@ -74,6 +63,7 @@ def main():
 
     eval_interval = 10 
     save_interval = 100 
+    save_model = True
     ModelIdex = None # Index of the model to load
 
     if not os.path.exists('model'): os.mkdir('model')
@@ -84,21 +74,14 @@ def main():
         model.load(ModelIdex)
 
 
-    traj_lenth = 0
     total_steps = 0
 
-    """score = evaluate_policy(eval_env, model, False)
-    if write:
-        writer.add_scalar('ep_r', score, global_step=total_steps)
-        print('steps: {}'.format(int(total_steps/1000)),'score:', score)"""
-
-    for epoch in range(training_epochs):
+    for epoch in tqdm(range(training_epochs)):
         states, done, steps, ep_r = env.reset(), False, 0, 0
 
         #Training the model
         steps = 0
         while  steps < 600:
-            traj_lenth += 1
             steps += 1
             actions, pi_actions =[], []
             for s in states:
@@ -109,7 +92,7 @@ def main():
             actions = np.array(actions)
             pi_actions = np.array(pi_actions)
             next_states, rewards, done, info = env.step(actions)
-            env.render()
+            # env.render()
 
             
             for s, s_prime, a, r in zip(states, next_states, actions, rewards):
@@ -117,21 +100,23 @@ def main():
                 ep_r += r
             states = next_states
 
-        a_loss, c_loss, entropy = model.train()
-        traj_lenth = 0
-        """print("a_loss : ", a_loss)
-        print("c_loss : ", c_loss)
-        print("entropy : ", entropy)"""
+        
+        # print("a_loss : ", a_loss)
+        # print("c_loss : ", c_loss)
+        # print("entropy : ", entropy)
 
 
-        if epoch % 100 == 0:
-            print('Policy evaluation')
+        if epoch % 10 == 0:
+            a_loss, c_loss, entropy = model.train()
+            print("Actor loss : ", a_loss)
+            print("Critic loss : ", c_loss)
+
             score = evaluate_policy(eval_env, model, True)
-            print('Ants Env: ', 'seed:',seed,'steps: {}k'.format(int(total_steps/1000)),'score:', score)
+            print('Epoch {}:'.format(epoch),'score:', score)
             total_steps += 1
 
-        """if save_model and epoch % save_interval==0:
-            model.save(total_steps)"""
+        if save_model and epoch % save_interval==0:
+            model.save(total_steps)
 
 
     env.close()
