@@ -157,8 +157,9 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
     environment = gym.make('gym_ants:ants-v0')
     set_random_seed(environment, seed)
 
-    model = NNModel(2, 4)
-    nb_trajectories = 500
+    state_dim = 3
+    model = NNModel(state_dim, 4)
+    nb_trajectories = 1000
 
     source_agent = DQN(environment.action_space, network=model, optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate), loss_function=dqn_loss)
     target_agent = DQN(environment.action_space, network=model, optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate), loss_function=dqn_loss)
@@ -178,7 +179,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
         step_count = 1
         mean_loss = []
         while not trajectory_done and step_count <600:
-            environment.render()
+            #environment.render()
             actions = []
             for s in states:
                 q_vals =target_agent.predict_on_batch(s.astype(np.float32)) 

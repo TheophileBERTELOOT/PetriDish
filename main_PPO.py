@@ -4,7 +4,8 @@ import os, shutil
 import numpy as np
 from tqdm import tqdm
 from rl_agents.PPO import device, PPO
-
+import matplotlib.pyplot as plt
+import pickle
 
 def evaluate_policy(env, model, render):
     scores = 0
@@ -13,7 +14,7 @@ def evaluate_policy(env, model, render):
         states, done, ep_rewards, steps = env.reset(), False, 0, 0
         steps = 0
         ep_r = 0
-        while not done and steps < 1000:
+        while not done and steps < 600:
             actions, pi_actions = [], []
             for s in states:
                 a, pi_a = model.evaluate(torch.from_numpy(s).float().to(device))
@@ -32,9 +33,6 @@ def evaluate_policy(env, model, render):
 def main():
     env = gym.make('gym_ants:ants-v0')
     eval_env = gym.make('gym_ants:ants-v0')
-    state_dim = 6
-    action_dim = 3
-    max_e_steps = 1000
 
     seed = 42
     torch.manual_seed(seed)
@@ -42,12 +40,9 @@ def main():
     eval_env.seed(seed)
     np.random.seed(seed)
 
-    print('Ants Env: ', ' , state_dim:',state_dim,'  action_dim:',action_dim,'   Random Seed:',seed, '  max_e_steps:',max_e_steps)
-    print('\n')
-
     load_model = False
 
-    state_dim = 2
+    state_dim = 3
     action_dim = 4
     hidden_dim = 200
     gamma = 0.99
@@ -75,6 +70,8 @@ def main():
 
 
     total_steps = 0
+
+    scores_history = []
 
     for epoch in tqdm(range(training_epochs)):
         states, done, steps, ep_r = env.reset(), False, 0, 0
@@ -108,16 +105,25 @@ def main():
 
         if epoch % 10 == 0:
             a_loss, c_loss, entropy = model.train()
-            print("Actor loss : ", a_loss)
-            print("Critic loss : ", c_loss)
+            # print("Actor loss : ", a_loss)
+            # print("Critic loss : ", c_loss)
 
-            score = evaluate_policy(eval_env, model, True)
+            score = evaluate_policy(eval_env, model, render=False)
             print('Epoch {}:'.format(epoch),'score:', score)
+            scores_history.append(score)
             total_steps += 1
 
         if save_model and epoch % save_interval==0:
             model.save(total_steps)
 
+    with open('scores_history_PPO', 'wb') as fp:
+        pickle.dump(scores_history, fp)
+
+
+    plt.plot(scores_history)
+    plt.xlabel("Épisodes")
+    plt.ylabel("Récompense cumulative")
+    plt.show()
 
     env.close()
     eval_env.close()

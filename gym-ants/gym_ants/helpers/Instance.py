@@ -296,7 +296,7 @@ class Instance(object):
             haut = 0
 
         # return np.array([cell.coordinate[0], cell.coordinate[1],closestFoodCoordinate[0],closestFoodCoordinate[1]])
-        return np.array([droite,haut])
+        return np.array([droite,haut, self.closestFood(cell)/minDist])
 
 
 
