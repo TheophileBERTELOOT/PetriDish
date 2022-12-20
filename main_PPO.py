@@ -131,13 +131,11 @@ def main():
         writer.add_scalar('ep_r', score, global_step=total_steps)
         print('steps: {}'.format(int(total_steps/1000)),'score:', score)"""
     while total_steps < Max_train_steps:
-        print('total_steps : ',total_steps)
         states, done, steps, ep_r = env.reset(), False, 0, 0
 
         '''Interact & trian'''
         steps = 0
         while  steps < 500:
-            print('steps : ', steps)
             traj_lenth += 1
             steps += 1
             if True:
@@ -157,8 +155,6 @@ def main():
                     pi_actions.append(pi_a)
 
             actions = np.array(actions)
-            print(actions)
-            print('buyashaka !!!')
             pi_actions = np.array(pi_actions)
             next_states, rewards, done, info = env.step(actions)
 

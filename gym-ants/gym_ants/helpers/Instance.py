@@ -176,6 +176,17 @@ class Instance(object):
 
         return [-1,-1]
 
+    def getClosestEnnemyCoordinate(self,cell):
+        minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
+        index = 0
+        if len(cell.enemyInVisionRange) > 0:
+            minDist = min(cell.enemyInVisionDistance)
+            index = cell.enemyInVisionDistance.index(minDist)
+            return cell.enemyInVisionRange[index].coordinate
+
+
+        return [-1,-1]
+
     def getClosestObstacleCoordinate(self,cell):
         minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
         index = 0
@@ -216,9 +227,13 @@ class Instance(object):
 
     def _get_reward(self, cell):
         minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
+        eaten = 0
         if cell.hasEaten:
-            return 100
-        reward = self.calcDistanceReward(cell)
+            eaten=  10
+        hit = 0
+        if cell.isHit:
+            hit = -1
+        reward = eaten + hit +self.calcDistanceReward(cell)
         return reward
 
 
@@ -280,7 +295,8 @@ class Instance(object):
         # return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
         closestFoodCoordinate = self.getClosestFoodCoordinate(cell)
 
-
+        enemyCoordinate = self.getClosestEnnemyCoordinate(cell)
+        enemyDistance = self.closestEnemy(cell)/minDist
         if closestFoodCoordinate[0] > cell.coordinate[0] +10:
             droite=1
         elif closestFoodCoordinate[0] < cell.coordinate[0] -10:
@@ -295,8 +311,24 @@ class Instance(object):
         else:
             haut = 0
 
+        if enemyCoordinate[0] > cell.coordinate[0] +10:
+            droiteEnemy=1
+        elif enemyCoordinate[0] < cell.coordinate[0] -10:
+            droiteEnemy = -1
+        else:
+            droiteEnemy = 0
+
+        if enemyCoordinate[1]> cell.coordinate[1]+10:
+            hautEnemy = 1
+        elif enemyCoordinate[1] < cell.coordinate[1] - 10:
+            hautEnemy = -1
+        else:
+            hautEnemy = 0
+
+
+
         # return np.array([cell.coordinate[0], cell.coordinate[1],closestFoodCoordinate[0],closestFoodCoordinate[1]])
-        return np.array([droite,haut])
+        return np.array([droite,haut,droiteEnemy,hautEnemy,enemyDistance])
 
 
 

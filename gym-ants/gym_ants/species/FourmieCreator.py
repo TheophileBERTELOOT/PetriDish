@@ -39,7 +39,7 @@ class FourmieCreator(SpeciesCreator):
         return fourmie
 
     def Update(self) :
-        if (self.nbFourmiPerColonie >= self.numberFourmiesCreatedPerColonie) :
+        if (self.nbFourmiPerColonie > self.numberFourmiesCreatedPerColonie) :
             self.firstFourmiInColonie = False
         else :
             self.firstFourmiInColonie = True
@@ -49,9 +49,9 @@ class FourmieCreator(SpeciesCreator):
             self.currentColonieReine = None
 
     def initColor(self) :
-        r = random.randint(0, 100)
-        g = random.randint(0, 100)
-        b = random.randint(0, 100)
+        r = random.randint(0, 255)
+        g = random.randint(0, 255)
+        b = random.randint(0, 255)
         self.colonieInCreationColor = (r,g,b)
 
     def Create(self,parent=None,type=1):

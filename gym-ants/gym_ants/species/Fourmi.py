@@ -28,7 +28,7 @@ class Fourmi(Species):
         self.age = -timeInEggForm
         self.isEgg=False
         self.hungriness = 0
-        
+        self.enemyAttacking = None
         self.isCarried=False
         self.isEaten = False
         self.fourmiSenseRadius = fourmiSenseRadius
@@ -41,7 +41,7 @@ class Fourmi(Species):
         self.visionRayObject = []
         self.obstacleInVisionRange = []
         self.obstacleInVisionDistance = []
-
+        self.isHit = False
         self.objectInVisionRange = []
         self.objectInVisionDistance = []
 
@@ -127,11 +127,9 @@ class Fourmi(Species):
             self.objectInVisionRange.append(grass)
             self.objectInVisionDistance.append(distance)
         for fourmi in fourmis:
-            if fourmi.colonieId == self.colonieId:
-                continue
-            C = fourmi.coordinate
-            distance = calcDistanceBetweenTwoPoint(C, E)
-            if distance < lengthRay:
+            if fourmi.colonieId != self.colonieId:
+                C = fourmi.coordinate
+                distance = calcDistanceBetweenTwoPoint(C, E)
                 self.enemyInVisionRange.append(fourmi)
                 self.enemyInVisionDistance.append(distance)
         for obstacle in obstacles:
@@ -256,12 +254,16 @@ class Fourmi(Species):
         self.isDead = True 
 
     def interaction_between_colonies(self, creatures):
+        self.isHit=False
         for creature in creatures:
             if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, creature.coordinate[0],
                             creature.coordinate[1]):
 
                 # Si les fourmis qui se rencontrent ne sont pas de la même colonie, elles se battent
                 if creature.colonieId != self.colonieId:
+                    wasAttacked = True
+                    self.isHit = True
+
                     if self.isEgg:
                         if not creature.isEgg:
                             self.eaten() # L'oeuf se fait manger par la fourmi adverse
@@ -269,9 +271,9 @@ class Fourmi(Species):
                             continue # Si les deux fourmis sont des oeufs, rien ne se passe
                     
                     # Le degré de la blessure va dépendre de la santé des deux fourmis 
-                    if creature.health > 0 and self.health > 0:
-                        injury_degree = self.random.beta(creature.health, self.health)
-                        self.health = int(self.health * injury_degree)
+                    # if creature.health > 0 and self.health > 0:
+                    #     injury_degree = self.random.beta(creature.health, self.health)
+                    #     self.health = int(self.health * injury_degree)
 
 
 

@@ -157,7 +157,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
     environment = gym.make('gym_ants:ants-v0')
     set_random_seed(environment, seed)
 
-    model = NNModel(2, 4)
+    model = NNModel(5, 4)
     nb_trajectories = 500
 
     source_agent = DQN(environment.action_space, network=model, optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate), loss_function=dqn_loss)
@@ -231,7 +231,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
         subfig.plot(fig_to_plot[index], label=labels[index])
         subfig.set_xlabel(x_labels[index])
         subfig.legend()
-    pyplot.savefig('test.png')
+    pyplot.savefig('test_enemy_3_randomFood.png')
     
 
 if __name__ == "__main__":
