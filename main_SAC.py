@@ -3,7 +3,7 @@ import torch
 import os, shutil
 import numpy as np
 from tqdm import tqdm
-from rl_agents.PPO import device, PPO
+from rl_agents.SAC import device, SAC
 import matplotlib.pyplot as plt
 import pickle
 
@@ -62,7 +62,7 @@ def main():
     ModelIdex = None # Index of the model to load
 
     if not os.path.exists('model'): os.mkdir('model')
-    model = PPO(state_dim, action_dim, hidden_dim, gamma, lmbda, lr, clip_rate, 
+    model = SAC(state_dim, action_dim, hidden_dim, gamma, lmbda, lr, clip_rate, 
                 batch_size, entropy_coef_decay, entropy_coef, n_epochs, weight_decay)
 
     if load_model: 
@@ -71,8 +71,6 @@ def main():
 
     total_steps = 0
 
-
-
     scores_history = []
 
     for epoch in tqdm(range(training_epochs)):
@@ -80,9 +78,7 @@ def main():
 
         #Training the model
         steps = 0
-
         while  steps < 600:
-
             steps += 1
             actions, pi_actions =[], []
             for s in states:
@@ -112,15 +108,15 @@ def main():
             # print("Actor loss : ", a_loss)
             # print("Critic loss : ", c_loss)
 
-            score = evaluate_policy(eval_env, model, render=False)
+            score = evaluate_policy(eval_env, model, render=True)
             print('Epoch {}:'.format(epoch),'score:', score)
             scores_history.append(score)
             total_steps += 1
 
-        if save_model and epoch % save_interval==0:
-            model.save(total_steps)
+        """if save_model and epoch % save_interval==0:
+            model.save(total_steps)"""
 
-    with open('scores_history_PPO', 'wb') as fp:
+    with open('scores_history_SAC', 'wb') as fp:
         pickle.dump(scores_history, fp)
 
 

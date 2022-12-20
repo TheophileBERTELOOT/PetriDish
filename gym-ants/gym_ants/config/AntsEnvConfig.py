@@ -18,8 +18,10 @@ carnivoreBonusHealthWhenEat=10000
 carnivoreReproductionThreshold=3
 carnivoreHungrinessThreshold=25
 
+
 nbFourmiPerColonie = 2
 nbFourmiColonie =2
+
 timeInEggForm = 500
 fourmiInitRadius=20
 fourmiInitHealth=10000

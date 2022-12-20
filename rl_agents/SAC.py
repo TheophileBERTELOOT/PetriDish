@@ -46,7 +46,7 @@ class Critic(nn.Module):
         return v
 
 
-class PPO():
+class SAC():
     def __init__(self, state_dim, action_dim, hidden_dim=200, gamma=0.99, 
                                                 lmbda=0.95, lr=1e-4, 
                                                 clip_rate=0.2, 
@@ -54,17 +54,26 @@ class PPO():
                                                 entropy_coef_decay=0.99,
                                                 entropy_coef = 1e-3,
                                                 n_epochs=10,
-                                                weight_decay=1e-3):
+                                                weight_decay=1e-3, alpha=0.1):
 
 
         self.actor = Actor(state_dim, action_dim, hidden_dim).to(device)
-        self.critic = Critic(state_dim, hidden_dim).to(device)
+        self.critic_1 = Critic(state_dim, hidden_dim).to(device)
+        self.critic_2 = Critic(state_dim, hidden_dim).to(device)
 
-        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=lr, weight_decay=weight_decay)
+        self.critic_target_1 = Critic(state_dim, hidden_dim).to(device)
+        self.critic_target_2 = Critic(state_dim, hidden_dim).to(device)
+
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=lr, weight_decay=weight_decay)
+        self.critic_optimizer_1 = torch.optim.Adam(self.critic_1.parameters(), lr=lr, weight_decay=weight_decay)
+        self.critic_optimizer_2 = torch.optim.Adam(self.critic_2.parameters(), lr=lr, weight_decay=weight_decay)
         
+        self.critic_target_optimizer_1 = torch.optim.Adam(self.critic_target_1.parameters(), lr=lr, weight_decay=weight_decay)
+        self.critic_target_optimizer_2 = torch.optim.Adam(self.critic_target_2.parameters(), lr=lr, weight_decay=weight_decay)
+
         self.state_dim = state_dim
         self.data = []
+        self.alpha = alpha
         self.gamma = gamma
         self.lmbda = lmbda
         self.clip_rate = clip_rate
@@ -90,37 +99,58 @@ class PPO():
             pi_a = pi[a].item()
         return a, pi_a
 
+    def soft_update(self, tau=0.1):
+        for target_param, local_param in zip(self.critic_target_1.parameters(), self.critic_1.parameters()):
+            target_param.data.copy_(tau * local_param.data + (1 - tau) * target_param.data)
+
+        for target_param, local_param in zip(self.critic_target_2.parameters(), self.critic_2.parameters()):
+            target_param.data.copy_(tau * local_param.data + (1 - tau) * target_param.data)
 
     def train(self):
         s, a, r, s_prime, old_prob_a,done= self.make_batch()
         self.entropy_coef *= self.entropy_coef_decay #exploring decay
-
+        self.soft_update(tau=1.0)
         with torch.no_grad():
-            vs = self.critic(s)
-            vs_prime = self.critic(s_prime)
+            vs_1 = self.critic_1(s)
+            vs_prime_1 = self.critic_target_1(s_prime)
 
-            deltas = r + self.gamma * vs_prime  - vs
-            deltas = deltas.cpu().flatten().numpy()
-            adv = [0]
+            deltas_1 = r + self.gamma * vs_prime_1  - vs_1
+            deltas_1 = deltas_1.cpu().flatten().numpy()
+            adv_1 = [0]
 
-            for delta in deltas[::-1]:
-                advantage = delta + self.gamma * self.lmbda * adv[-1] 
-                adv.append(advantage)
-            adv.reverse()
-            adv = copy.deepcopy(adv[0:-1])
-            adv = torch.tensor(adv).unsqueeze(1).float().to(device)
-            td_target = adv + vs
-            adv = (adv - adv.mean()) / ((adv.std() + 1e-4))  
+            for delta in deltas_1[::-1]:
+                advantage = delta + self.gamma * self.lmbda * adv_1[-1] 
+                adv_1.append(advantage)
+            adv_1.reverse()
+            adv_1 = copy.deepcopy(adv_1[0:-1])
+            adv_1 = torch.tensor(adv_1).unsqueeze(1).float().to(device)
+            td_target_1 = adv_1 + vs_1
+            adv_1 = (adv_1 - adv_1.mean()) / ((adv_1.std() + 1e-4))  
 
+            vs_2 = self.critic_2(s)
+            vs_prime_2 = self.critic_target_2(s_prime)
+
+            deltas_2 = r + self.gamma * vs_prime_2  - vs_2
+            deltas_2 = deltas_2.cpu().flatten().numpy()
+            adv_2 = [0]
+
+            for delta in deltas_2[::-1]:
+                advantage = delta + self.gamma * self.lmbda * adv_2[-1] 
+                adv_2.append(advantage)
+            adv_2.reverse()
+            adv_2 = copy.deepcopy(adv_2[0:-1])
+            adv_2 = torch.tensor(adv_2).unsqueeze(1).float().to(device)
+            td_target_2 = adv_2 + vs_2
+            adv_2 = (adv_2 - adv_2.mean()) / ((adv_2.std() + 1e-4))  
 
         optim_iter_num = int(math.ceil(s.shape[0] / self.optim_batch_size))
-
         for _ in range(self.n_epochs):
             perm = np.arange(s.shape[0])
             np.random.shuffle(perm)
             perm = torch.LongTensor(perm).to(device)
-            s, a, td_target, adv, old_prob_a = \
-                s[perm].clone(), a[perm].clone(), td_target[perm].clone(), adv[perm].clone(), old_prob_a[perm].clone()
+            s, a, td_target_1, adv_1, td_target_2, adv_2, old_prob_a = \
+                s[perm].clone(), a[perm].clone(), td_target_1[perm].clone(), adv_1[perm].clone(), td_target_2[perm].clone(), adv_2[perm].clone(), old_prob_a[perm].clone()
+
 
             # PPO update
             for i in range(optim_iter_num):
@@ -130,24 +160,33 @@ class PPO():
                 prob = self.actor.pi(s[index], softmax_dim=1)
                 entropy = Categorical(prob).entropy().sum(0, keepdim=True)
                 prob_a = prob.gather(1, a[index])
-                ratio = torch.exp(torch.log(prob_a) - torch.log(old_prob_a[index]))  # a/b == exp(log(a)-log(b))
+                
+                q_values_1 = self.critic_1(s[index])
+                q_values_2 = self.critic_2(s[index])
 
-                surr1 = ratio * adv[index]
-                surr2 = torch.clamp(ratio, 1 - self.clip_rate, 1 + self.clip_rate) * adv[index]
-                a_loss = -torch.min(surr1, surr2) - self.entropy_coef * entropy
+                inside_term = self.alpha*torch.log(prob_a) - torch.min(q_values_1, q_values_2)
+                a_loss = (prob_a*inside_term).sum(dim=1).mean()
 
                 self.actor_optimizer.zero_grad()
-                a_loss.mean().backward()
+                a_loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 40)
                 self.actor_optimizer.step()
 
                 # Update the critic
-                c_loss = (self.critic(s[index]) - td_target[index]).pow(2).mean()
+                c_1_loss = (self.critic_1(s[index]) - td_target_1[index]).pow(2).mean()
+                c_2_loss = (self.critic_2(s[index]) - td_target_2[index]).pow(2).mean()
 
-                self.critic_optimizer.zero_grad()
-                c_loss.backward()
-                self.critic_optimizer.step()
-        return a_loss.mean(), c_loss, entropy
+                self.critic_optimizer_1.zero_grad()
+                c_1_loss.backward()
+                self.critic_optimizer_1.step()
+
+                self.critic_optimizer_2.zero_grad()
+                c_2_loss.backward()
+                self.critic_optimizer_2.step()
+
+                self.soft_update()
+
+        return a_loss.mean(), c_1_loss+c_2_loss, entropy
 
     def make_batch(self):
         l = len(self.data)
