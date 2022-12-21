@@ -30,7 +30,7 @@ def evaluate_policy(env, model, render):
     return scores/turns
 
 
-def main_PPO(seed):
+def main_SAC(seed):
     env = gym.make('gym_ants:ants-v0')
     eval_env = gym.make('gym_ants:ants-v0')
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     histories = []
     for _ in range(nb_runs):
         s = np.random.randint(1000)
-        histories.append(main_PPO(s))
+        histories.append(main_SAC(s))
 
     avg_experiments_cumulative_rewards = np.mean(histories, axis=0)
     std_experiments_cumulative_rewards  = np.std(histories , axis=0)

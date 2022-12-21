@@ -5,9 +5,8 @@ import numpy as np
 import gym
 import torch
 import random
-import matplotlib
-matplotlib.use('Agg')
-from matplotlib import pyplot
+import matplotlib.pyplot as plt 
+import pickle
 
 
 class ReplayBuffer:
@@ -190,7 +189,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
     R_trajectories = np.zeros(nb_trajectories)
     loss = []
     avg_training_loss = np.zeros(nb_trajectories)
-
+    scores_history = []
     for n_trajectories in range(nb_trajectories):
         trajectory_done = False
 
@@ -227,6 +226,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
 
             loss_mean = loss[-1]
             score = evaluate_policy(eval_env, target_agent, render=False)
+            scores_history.append(score)
             print('Epoch {}:'.format(n_trajectories),'score:', score)
             #print(f"After {n_trajectories} trajectories, we have G_0 = {G:.2f}, loss {loss_mean}, epsilon  {epsilon:4f}")
         
@@ -234,28 +234,9 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
         epsilon = max(0.99*epsilon, 0.01)
         R_trajectories[n_trajectories] = G
         avg_training_loss[n_trajectories] = np.mean(np.array(mean_loss))
-
-    done = False
-    s = environment.reset().astype(np.float32)
     environment.close()
-    # while not done:
-    #     environment.render()
-    #
-    #     q_vals = target_agent.predict_on_batch(s)
-    #     action = np.argmax(q_vals)
-    #     next_s, r, done, _ = environment.step(action)
-    #     s = next_s
-    # environment.close()
-
-    fig, subfigs = pyplot.subplots(2, 1, tight_layout=True)
-    labels = ["cumulative reward", "Average training loss"]
-    x_labels = ['episodes','episodes']
-    fig_to_plot = [R_trajectories, avg_training_loss]
-    for subfig, index in zip(subfigs.reshape(-1), range(2)):
-        subfig.plot(fig_to_plot[index], label=labels[index])
-        subfig.set_xlabel(x_labels[index])
-        subfig.legend()
-    pyplot.savefig('test_enemy_3_randomFood.png')
+    eval_env.close()
+    return scores_history
     
 
 if __name__ == "__main__":
@@ -270,7 +251,33 @@ if __name__ == "__main__":
     buffer_size = 4e5
     seed = 42
     tau = 0.1
-    training_interval = 3
+    training_interval = 10
     learning_rate = 1*1e-4
 
-    run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_rate)
+    seed = 42
+
+    nb_runs = 20
+    np.random.seed(seed)
+    histories = []
+    for _ in range(nb_runs):
+        s = np.random.randint(1000)
+        histories.append(run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_rate))
+
+    avg_experiments_cumulative_rewards = np.mean(histories, axis=0)
+    std_experiments_cumulative_rewards  = np.std(histories , axis=0)
+
+    epochs = np.array(range(len(avg_experiments_cumulative_rewards)))*10
+    plt.plot(epochs, avg_experiments_cumulative_rewards, label = "SAC")   
+    plt.fill_between(epochs, avg_experiments_cumulative_rewards, 
+                            avg_experiments_cumulative_rewards+std_experiments_cumulative_rewards, alpha=0.4)
+    
+    with open('history/scores_history_SAC{}'.format(seed), 'wb') as fp:
+        pickle.dump(histories, fp)
+
+
+    plt.xlabel("Épisodes")
+    plt.ylabel("Récompenses")
+
+    plt.legend()
+    plt.show()
+
