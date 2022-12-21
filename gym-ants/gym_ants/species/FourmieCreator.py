@@ -9,8 +9,8 @@ class FourmieCreator(SpeciesCreator):
     Classes for the creation of ours species.
     """
 
-    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas, nbFourmiPerColonie, nbFourmiColonie, timeInEggForm, senseRadius, numberRay, angleOfVision):
-        super().__init__(maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas)
+    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas, nbFourmiPerColonie, nbFourmiColonie, timeInEggForm, senseRadius, numberRay, angleOfVision, seed=None):
+        super().__init__(maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas, seed)
         self.colonieInCreationId = 0
         self.firstFourmiInColonie = True
         self.numberFourmiesCreatedPerColonie = 0
@@ -21,6 +21,8 @@ class FourmieCreator(SpeciesCreator):
         self.senseRadius = senseRadius 
         self.numberRay = numberRay
         self.angleOfVision = angleOfVision
+        random.seed(seed)
+        np.random.seed(seed)
 
         self.initColor()
 

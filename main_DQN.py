@@ -39,23 +39,41 @@ class ReplayBuffer:
         return random.choices(self.data, k=batch_size)
 
 
+def evaluate_policy(env, model, render):
+    scores = 0
+    turns = 1
+    for j in range(turns):
+        states, done, ep_rewards, steps = env.reset(), False, 0, 0
+        steps = 0
+        ep_r = 0
+        while not done and steps < 600:
+            actions = []
+            for s in states:
+                q_vals =model.predict_on_batch(s.astype(np.float32)) 
+                actions.append(model.select_action(q_vals, epsilon=0, evaluate=True))
+            next_states, rewards, done, info = env.step(actions)
+            ep_r += np.sum(rewards)
+            steps += 1
+            states = next_states
+            if render:
+                env.render()
+        scores += ep_r
+    return scores/turns
+
 class DQN(Model):
     def __init__(self, actions, *args, **kwargs):
         self.actions = actions
         super().__init__(*args, **kwargs)
 
-    def get_action(self, state, epsilon):
+    def select_action(self, state, epsilon=0, evaluate=False):
         '''
         Returns the selected action according to an epsilon-greedy policy.
         '''
-        
-        if np.random.rand() < epsilon:
+
+        if np.random.rand() < epsilon and not evaluate:
             action = self.actions.sample()
         else:
             action =  np.argmax(state)
-        
-        if action > 5:
-            print(state, action)
         
         return action
 
@@ -155,10 +173,12 @@ def set_random_seed(environment, seed):
 
 def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_rate):
     environment = gym.make('gym_ants:ants-v0')
+    eval_env = gym.make('gym_ants:ants-v0')
+    eval_env.seed(seed)
     set_random_seed(environment, seed)
 
 
-    model = NNModel(5, 4)
+    model = NNModel(6, 4)
     nb_trajectories = 500
 
 
@@ -184,7 +204,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
             actions = []
             for s in states:
                 q_vals =target_agent.predict_on_batch(s.astype(np.float32)) 
-                actions.append(target_agent.get_action(q_vals, epsilon))
+                actions.append(target_agent.select_action(q_vals, epsilon))
             next_states, rewards, trajectory_done, _ = environment.step(actions)
             G += np.sum(rewards)
             for (s, a, r, next_s) in zip(states, actions, rewards, next_states):
@@ -206,7 +226,9 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
         if n_trajectories % 10 == 0:
 
             loss_mean = loss[-1]
-            print(f"After {n_trajectories} trajectories, we have G_0 = {G:.2f}, loss {loss_mean}, epsilon  {epsilon:4f}")
+            score = evaluate_policy(eval_env, target_agent, render=False)
+            print('Epoch {}:'.format(n_trajectories),'score:', score)
+            #print(f"After {n_trajectories} trajectories, we have G_0 = {G:.2f}, loss {loss_mean}, epsilon  {epsilon:4f}")
         
 
         epsilon = max(0.99*epsilon, 0.01)

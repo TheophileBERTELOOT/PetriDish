@@ -67,9 +67,13 @@ class AntsEnv(gym.Env):
 			running = self.eventHandler.handleEvent(e,self.instance)
 
 
+	
+
+
 	def close(self):
 		if self.render_init:
 			pg.quit()
+
 
 	
 

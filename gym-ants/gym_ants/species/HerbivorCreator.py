@@ -6,9 +6,11 @@ from copy import deepcopy
 
 class HerbivorCreator(SpeciesCreator):
 
-    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas):
-         super().__init__(maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas)
-
+    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas, seed=None):
+         super().__init__(maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas, seed)
+         random.seed(seed)
+         np.random.seed(seed)
+         
     def create(self,parent=None):
         if parent == None:
             x = random.randint(0, self.maxX)
@@ -44,3 +46,4 @@ class HerbivorCreator(SpeciesCreator):
             herbivore = Herbivore(x, y, dx, dy, r, g, b, radius, health, bonusHealth, reproductionThreshold,hungrinessThreshold, pas)
             herbivore.agent = deepcopy(parent.agent)
         return herbivore
+

@@ -229,11 +229,11 @@ class Instance(object):
         minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
         eaten = 0
         if cell.hasEaten:
-            eaten=  10
+            eaten=  100
         hit = 0
         if cell.isHit:
-            hit = -1
-        reward = eaten + hit +self.calcDistanceReward(cell)
+            hit = -0.1
+        reward = eaten + hit + self.calcDistanceReward(cell)
         return reward
 
 
@@ -297,6 +297,8 @@ class Instance(object):
 
         enemyCoordinate = self.getClosestEnnemyCoordinate(cell)
         enemyDistance = self.closestEnemy(cell)/minDist
+        foodDistance = self.closestFood(cell)/minDist
+
         if closestFoodCoordinate[0] > cell.coordinate[0] +10:
             droite=1
         elif closestFoodCoordinate[0] < cell.coordinate[0] -10:
@@ -329,7 +331,7 @@ class Instance(object):
 
         # return np.array([cell.coordinate[0], cell.coordinate[1],closestFoodCoordinate[0],closestFoodCoordinate[1]])
 
-        return np.array([droite,haut,droiteEnemy,hautEnemy,enemyDistance])
+        return np.array([droite,haut, foodDistance, droiteEnemy,hautEnemy,enemyDistance])
 
 
 

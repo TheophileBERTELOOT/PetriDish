@@ -9,10 +9,13 @@ class CarnivoreCreator(SpeciesCreator):
     Classes for the creation of ours species.
     """
 
-    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas):
-         super().__init__(maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas)
+    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas, seed=None):
+         super().__init__(maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas, seed)
     
     def create(self, parent=None):
+        random.seed(seed)
+        np.random.seed(seed)
+
         if parent == None:
             x = random.randint(0, self.maxX)
             y = random.randint(0, self.maxY)

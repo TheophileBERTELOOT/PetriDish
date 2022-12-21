@@ -9,7 +9,7 @@ class Species(ABC):
     """
     
     @abstractmethod
-    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas):
+    def __init__(self,x,y,dx,dy,r,g,b,radius,initHealth,bonusHealth,reproductionThreshold,hungrinessThreshold,pas, seed):
         self.coordinate=np.array([x,y],dtype=float)
         self.dx=dx
         self.dy=dy
@@ -28,6 +28,7 @@ class Species(ABC):
         self.nbOffspring = 0
         self.nbAte = 0
         self.hasEaten = False
+        self.seed = seed
 
         self.angle = calcAngle(dx,dy)
 

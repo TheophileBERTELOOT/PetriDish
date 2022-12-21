@@ -7,7 +7,7 @@ class SpeciesCreator(ABC):
     """
 
     @abstractmethod
-    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas) :
+    def __init__(self, maxX, maxY, number, initRadius, initHealth, bonusHealthWhenEat, reproductionThreshold, hungrinessThreshold,pas, seed) :
         self.maxX = maxX
         self.maxY = maxY
         self.number = number
@@ -17,6 +17,7 @@ class SpeciesCreator(ABC):
         self.reproductionThreshold = reproductionThreshold
         self.hungrinessThreshold = hungrinessThreshold
         self.pas = pas
+        self.seed = seed
 
     @abstractmethod
     def create(self,parent=None):
