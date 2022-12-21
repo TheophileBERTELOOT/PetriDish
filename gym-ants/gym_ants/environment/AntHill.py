@@ -6,7 +6,7 @@ class AntHill:
 
     def __init__(self, left, top,colonieId, colonieColor) :
         self.center = np.array([left,top],dtype=float)
-        self.radius = 100
+        self.radius = 300
         self.colonieId = colonieId
         self.color = self.GetColor(colonieColor)
 

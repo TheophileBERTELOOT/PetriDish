@@ -5,6 +5,7 @@ from gym_ants.environment.Obstacle import Obstacle
 import random
 import numpy as np
 import pygame as pg
+from gym_ants.helpers.util import aColideWithB,lineColideWithCircle,calcDistanceBetweenTwoPoint,calcAngle
 
 from copy import deepcopy
 
@@ -113,7 +114,8 @@ class Instance(object):
             if fourmi.health > 0:
                 # food = self.dish.grasses + self.deadBodies
                 food = self.dish.grasses
-                fourmi.eat(food)
+                # fourmi.eat(food)
+                fourmi.carryFood(food)
                 for antHill in self.dish.antHills:
                     if antHill.colonieId == fourmi.colonieId:
                         fourmiAntHill = antHill
@@ -198,6 +200,21 @@ class Instance(object):
 
         return [-1,-1]
 
+    def getQueenCoordinate(self,cell):
+        queen = self.getQueen(cell)
+        return queen.coordinate
+
+
+
+    def getQueenDistance(self,cell,):
+        minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
+        queen = self.getQueen(cell)
+        return calcDistanceBetweenTwoPoint(cell.coordinate,queen.coordinate)
+
+
+        return minDist
+
+
     def closestFood(self,cell):
         minDist = np.sqrt(self.maxX**2 + self.maxY**2)
         if len(cell.objectInVisionDistance)>0:
@@ -225,15 +242,30 @@ class Instance(object):
 
         return -self.closestFood(cell)/minDist
 
+    def getQueen(self,cell):
+        for fourmi in self.fourmis:
+            if fourmi.colonieId == cell.colonieId and fourmi.type == FourmiType.REINE:
+                return fourmi
+
+    def getQueenReward(self,cell):
+        queen = self.getQueen(cell)
+        if queen.hasEaten:
+            return 200
+        else:
+            return 0
+
     def _get_reward(self, cell):
         minDist = np.sqrt(self.maxX ** 2 + self.maxY ** 2)
         eaten = 0
+        distanceQueenReward = 0
+        if cell.foodCarried!=None:
+            distanceQueenReward = self.getQueenDistance(cell)/minDist
         if cell.hasEaten:
-            eaten=  10
+            eaten =  50
         hit = 0
         if cell.isHit:
             hit = -1
-        reward = eaten + hit +self.calcDistanceReward(cell)
+        reward = eaten + hit + self.getQueenReward(cell) + distanceQueenReward + self.calcDistanceReward(cell)
         return reward
 
 
@@ -294,6 +326,9 @@ class Instance(object):
         obstacleCoordinate = self.getClosestObstacleCoordinate(cell)
         # return np.array([cell.coordinate[0], cell.coordinate[1], cell.health, self.closestFood(cell), self.closestObstacle(cell), self.closestEnemy(cell)])
         closestFoodCoordinate = self.getClosestFoodCoordinate(cell)
+        foodDistance = self.closestFood(cell)
+        queenCoordinate = self.getQueenCoordinate(cell)
+        queenDistance = self.getQueenDistance(cell)/np.sqrt(self.maxX ** 2 + self.maxY ** 2)
 
         enemyCoordinate = self.getClosestEnnemyCoordinate(cell)
         enemyDistance = self.closestEnemy(cell)/minDist
@@ -325,11 +360,28 @@ class Instance(object):
         else:
             hautEnemy = 0
 
+        if queenCoordinate[0] > cell.coordinate[0] +10:
+            droiteQueen=1
+        elif queenCoordinate[0] < cell.coordinate[0] -10:
+            droiteQueen = -1
+        else:
+            droiteQueen = 0
+
+        if queenCoordinate[1]> cell.coordinate[1]+10:
+            hautQueen = 1
+        elif queenCoordinate[1] < cell.coordinate[1] - 10:
+            hautQueen = -1
+        else:
+            hautQueen = 0
+
+        carryingFood = -1
+        if cell.foodCarried != None:
+            carryingFood = 1
 
 
         # return np.array([cell.coordinate[0], cell.coordinate[1],closestFoodCoordinate[0],closestFoodCoordinate[1]])
 
-        return np.array([droite,haut,droiteEnemy,hautEnemy,enemyDistance])
+        return np.array([droite,haut,hautQueen,droiteQueen,queenDistance,carryingFood])
 
 
 

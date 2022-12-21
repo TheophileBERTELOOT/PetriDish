@@ -158,7 +158,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
     set_random_seed(environment, seed)
 
 
-    model = NNModel(5, 4)
+    model = NNModel(6, 4)
     nb_trajectories = 500
 
 
@@ -180,14 +180,16 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
         step_count = 1
         mean_loss = []
         while not trajectory_done and step_count <600:
-            #environment.render()
+            environment.render()
             actions = []
             for s in states:
                 q_vals =target_agent.predict_on_batch(s.astype(np.float32)) 
                 actions.append(target_agent.get_action(q_vals, epsilon))
             next_states, rewards, trajectory_done, _ = environment.step(actions)
             G += np.sum(rewards)
-            for (s, a, r, next_s) in zip(states, actions, rewards, next_states):
+            actions = actions[1:]
+            rewards = rewards[1:]
+            for (s, a, r, next_s) in zip(states[1:,:], actions, rewards, next_states[1:,:]):
                 replay_buffer.store((s.astype(np.float32)  , a, r, next_s.astype(np.float32)  , trajectory_done))
 
             if len(replay_buffer.data) > batch_size :
@@ -209,7 +211,7 @@ def run(batch_size, gamma, buffer_size, seed, tau, training_interval, learning_r
             print(f"After {n_trajectories} trajectories, we have G_0 = {G:.2f}, loss {loss_mean}, epsilon  {epsilon:4f}")
         
 
-        epsilon = max(0.99*epsilon, 0.01)
+        epsilon = max(0.995*epsilon, 0.01)
         R_trajectories[n_trajectories] = G
         avg_training_loss[n_trajectories] = np.mean(np.array(mean_loss))
 

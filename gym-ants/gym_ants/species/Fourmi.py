@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import pygame as pg
 from enum import Enum
@@ -124,8 +126,9 @@ class Fourmi(Species):
         for grass in grasses:
             C = grass.coordinate
             distance = calcDistanceBetweenTwoPoint(C, E)
-            self.objectInVisionRange.append(grass)
-            self.objectInVisionDistance.append(distance)
+            if not grass.isCarried:
+                self.objectInVisionRange.append(grass)
+                self.objectInVisionDistance.append(distance)
         for fourmi in fourmis:
             if fourmi.colonieId != self.colonieId:
                 C = fourmi.coordinate
@@ -173,22 +176,24 @@ class Fourmi(Species):
     def QeenEat(self, foods, anthill,fourmis):
         self.hasEaten = False
         if self.type == FourmiType.REINE:
-            for food in foods:
-                if aColideWithB(self.coordinate[0], self.coordinate[1],anthill.radius , food.coordinate[0],
-                                food.coordinate[1]) and self.hungriness > self.hungrinessThreshold :
-                    food.eaten()
-                    self.hasEaten = True
-                    self.health += self.bonusHealth
-                    self.death_age += self.bonusHealth
-                    self.nbAte += 1
-                    self.hungriness = 0
-                    for fourmi in fourmis:
-                        if fourmi.isEgg and fourmi.colonieId == self.colonieId:
-                            fourmi.hasEaten = True
-                            fourmi.health += fourmi.bonusHealth
-                            fourmi.death_age += fourmi.bonusHealth
-                            fourmi.nbAte += 1
-                            fourmi.hungriness = 0
+            for fourmi in fourmis:
+                if fourmi.foodCarried != None:
+                    if aColideWithB(self.coordinate[0], self.coordinate[1],anthill.radius , fourmi.foodCarried.coordinate[0],
+                                fourmi.foodCarried.coordinate[1]) :
+                        fourmi.foodCarried.eaten()
+                        fourmi.foodCarried = None
+                        self.hasEaten = True
+                        self.health += self.bonusHealth
+                        self.death_age += self.bonusHealth
+                        self.nbAte += 1
+                        self.hungriness = 0
+                    # for fourmi in fourmis:
+                    #     if fourmi.isEgg and fourmi.colonieId == self.colonieId:
+                    #         fourmi.hasEaten = True
+                    #         fourmi.health += fourmi.bonusHealth
+                    #         fourmi.death_age += fourmi.bonusHealth
+                    #         fourmi.nbAte += 1
+                    #         fourmi.hungriness = 0
 
         if not self.hasEaten:
             self.hungriness += 1
@@ -203,12 +208,19 @@ class Fourmi(Species):
 
 
     def carryFood(self, foods):
+        self.hasEaten = False
+        if self.foodCarried!=None:
+            self.foodCarried.coordinate = copy.deepcopy(self.coordinate)
+        if self.foodCarried!=None and self.foodCarried.isEaten:
+            self.foodCarried.isEaten = False
+            self.foodCarried = None
         for food in foods:
             if self.foodCarried!=None:
                 break
             if aColideWithB(self.coordinate[0], self.coordinate[1], self.radius, food.coordinate[0],
-                            food.coordinate[1]) :
+                            food.coordinate[1]) and not food.isCarried:
                 self.foodCarried = food
+                self.hasEaten = True
                 food.carried(self.coordinate[0],self.coordinate[1])
 
 
